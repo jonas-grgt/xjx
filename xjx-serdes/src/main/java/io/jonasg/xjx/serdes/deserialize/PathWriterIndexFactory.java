@@ -69,7 +69,7 @@ public class PathWriterIndexFactory {
     private void indexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
         if (field.isAnnotatedWith(ValueDeserialization.class)) {
             index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
-                value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String)value)
+                value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
                         .orElse(value);
                 FieldAccessor.of(field, parent.get()).set(value);
             }));
@@ -90,7 +90,7 @@ public class PathWriterIndexFactory {
     private void indexEnumType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
         index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
             if (field.isAnnotatedWith(ValueDeserialization.class)) {
-                value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String)value)
+                value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
                         .orElse(value);
             }
             FieldAccessor.of(field, parent.get()).set(value);
@@ -134,6 +134,8 @@ public class PathWriterIndexFactory {
                 return listTypeInstance;
             }));
             doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
+        } else {
+            throw new XjxDeserializationException("Generics of type Set require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
         }
     }
 
@@ -162,6 +164,8 @@ public class PathWriterIndexFactory {
                 return listTypeInstance;
             }));
             doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
+        } else {
+            throw new XjxDeserializationException("Generics of type List require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
         }
     }
 
