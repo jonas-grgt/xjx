@@ -8,13 +8,7 @@ LargeFileTest.java
 TODO.md
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-.idea/misc.xml
-.idea/encodings.xml
-.idea/markdown.xml
+.idea/
 *.iws
 *.iml
 *.ipr
