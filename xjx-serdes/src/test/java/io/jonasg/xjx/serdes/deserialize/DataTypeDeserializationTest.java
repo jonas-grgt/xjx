@@ -4,6 +4,8 @@ import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -255,6 +257,45 @@ public class DataTypeDeserializationTest {
                 .isEqualTo(ZonedDateTime.of(LocalDateTime.of(1985, 11, 1, 19, 12, 10), ZoneId.of("Europe/Brussels")));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"True","true","1","yes","YeS"})
+    void deserializeTrueValuesFor_booleanField(String value) {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <BooleanTrue>%s</BooleanTrue>
+                    <booleanTrue>%1$s</booleanTrue>
+                </DataTypes>
+                """.formatted(value);
+        // when
+        DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
+
+        // then
+        Assertions.assertThat(dataTypes.BooleanTrue).isTrue();
+        Assertions.assertThat(dataTypes.booleanTrue).isTrue();
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"False","false","0","no","No"})
+    void deserializeFalseValuesFor_booleanField(String value) {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <BooleanFalse>%s</BooleanFalse>
+                    <booleanFalse>%1$s</booleanFalse>
+                </DataTypes>
+                """.formatted(value);
+        // when
+        DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
+
+        // then
+        Assertions.assertThat(dataTypes.BooleanFalse).isFalse();
+        Assertions.assertThat(dataTypes.booleanFalse).isFalse();
+    }
+
     @Test
     void deserialize_MapField() {
         // given
@@ -288,7 +329,6 @@ public class DataTypeDeserializationTest {
                         "MapAC", Map.of("MapC", "Value3", "MapD", "Value4"),
                         "MapAD", Map.of("MapC", Map.of("MapD", "Value5"))));
     }
-
 
     static class DataTypes {
 
@@ -336,5 +376,17 @@ public class DataTypeDeserializationTest {
 
         @Tag(path = "/DataTypes/MapA")
         Map<String, Object> map;
+
+        @Tag(path = "/DataTypes/BooleanTrue")
+        Boolean BooleanTrue;
+
+        @Tag(path = "/DataTypes/booleanTrue")
+        boolean booleanTrue;
+
+        @Tag(path = "/DataTypes/BooleanFalse")
+        Boolean BooleanFalse = true;
+
+        @Tag(path = "/DataTypes/booleanFalse")
+        boolean booleanFalse = true;
     }
 }

@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 public class PathWriterIndexFactory {
 
     private static final List<Class<?>> BASIC_TYPES = List.of(
-            String.class, Integer.class, Long.class, long.class, BigDecimal.class, Double.class,
+            String.class, Integer.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
             double.class, char.class, Character.class, LocalDate.class, LocalDateTime.class, ZonedDateTime.class);
     private final Map<Class<?>, Object> listTypeCache = new HashMap<>();
 

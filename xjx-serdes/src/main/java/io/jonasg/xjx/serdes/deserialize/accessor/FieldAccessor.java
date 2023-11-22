@@ -14,6 +14,7 @@ public interface FieldAccessor {
     List<Class<Double>> DOUBLE_TYPES = List.of(double.class, Double.class);
     List<Class<Long>> LONG_TYPES = List.of(long.class, Long.class);
     List<Class<Character>> CHAR_TYPES = List.of(char.class, Character.class);
+    List<Class<Boolean>> BOOLEAN_TYPES = List.of(boolean.class, Boolean.class);
 
     static FieldAccessor of(FieldReflector field, Object instance) {
         var setterFieldAccessor = new SetterFieldAccessor(field, instance); //TODO optimize
@@ -38,6 +39,15 @@ public interface FieldAccessor {
         }
         if (CHAR_TYPES.contains(field.type())) {
             mapper = value -> String.valueOf(value).charAt(0);
+        }
+        if (BOOLEAN_TYPES.contains(field.type())) {
+            mapper = value -> {
+                String lowered = String.valueOf(value).toLowerCase();
+                if (lowered.equals("true") || lowered.equals("yes") || lowered.equals("1")) {
+                    return true;
+                }
+                return false;
+            };
         }
         if (field.type().equals(LocalDate.class)) {
             mapper = value -> LocalDate.parse(String.valueOf(value));
