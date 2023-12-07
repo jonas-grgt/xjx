@@ -3,6 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Maven ###
+.flattened-pom.xml
+
 ### Xjx ###
 LargeFileTest.java
 TODO.md
