@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 
 public class TagAttributeDeserializationTest {
     @Test
-    void deserialize_StringFieldField() {
+    void deserialize_StringField() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -28,7 +28,7 @@ public class TagAttributeDeserializationTest {
     }
 
     @Test
-    void deserialize_IntegerFieldField() {
+    void deserialize_IntegerField() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -45,7 +45,7 @@ public class TagAttributeDeserializationTest {
     }
 
     @Test
-    void deserialize_LongFieldField() {
+    void deserialize_LongField() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -62,7 +62,7 @@ public class TagAttributeDeserializationTest {
     }
 
     @Test
-    void deserialize_primitiveLongFieldField() {
+    void deserialize_primitiveLongField() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -79,7 +79,7 @@ public class TagAttributeDeserializationTest {
     }
 
     @Test
-    void deserialize_BigDecimalFieldField() {
+    void deserialize_BigDecimalField() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -216,6 +216,23 @@ public class TagAttributeDeserializationTest {
         Assertions.assertThat(dataTypes.booleanFalse).isFalse();
     }
 
+    @Test
+    void deserialize_StringField_mappedUsingRelativePath() {
+        // given
+        String data = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <DataTypes>
+                        <String value="11"/>
+                    </DataTypes>
+                    """;
+
+        // when
+        ParentHolder parentHolder = new XjxSerdes().read(data, ParentHolder.class);
+
+        // then
+        Assertions.assertThat(parentHolder.nestedField.String).isEqualTo("11");
+    }
+
     public static class DataTypeHolder {
         public DataTypeHolder() {
         }
@@ -261,5 +278,15 @@ public class TagAttributeDeserializationTest {
 
         @Tag(path = "/DataTypes/BooleanFalse", attribute = "boolean")
         boolean booleanFalse = true;
+    }
+
+    public static class ParentHolder {
+        @Tag(path = "/DataTypes")
+        NestedField nestedField;
+    }
+
+    public static class NestedField {
+        @Tag(path = "String", attribute = "value")
+        String String;
     }
 }

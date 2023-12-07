@@ -42,6 +42,12 @@ public class Path {
         return new Path(sections, section);
     }
 
+    public Path append(Path path) {
+        var copiedSections = new LinkedList<>(this.sections);
+        copiedSections.addAll(path.sections);
+        return new Path(copiedSections);
+    }
+
     public Path pop() {
         if (!sections.isEmpty()) {
             LinkedList<String> newSections = new LinkedList<>(sections);

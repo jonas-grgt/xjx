@@ -6,6 +6,7 @@ import io.jonasg.xjx.serdes.reflector.FieldReflector;
 import io.jonasg.xjx.serdes.reflector.Reflector;
 import io.jonasg.xjx.serdes.reflector.TypeReflector;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -67,6 +69,23 @@ public class PathWriterIndexFactory {
     }
 
     private void indexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+        if (field.isAnnotatedWith(Tag.class)) {
+            doIndexComplexType(field, index, path, parent);
+        } else {
+            searchFieldsRecursivelyForTag(field)
+                    .ifPresent(tagPath -> {
+                        if (tagPath.isAbsolute()) {
+                            doIndexComplexType(field, index, path, parent);
+                        } else {
+                            throw new XjxDeserializationException("Field " + tagPath.field().name() +
+                                                                  " is annotated with @Tag but one of it's parent " +
+                                                                  "is missing a @Tag.");
+                        }
+                    });
+        }
+    }
+
+    private void doIndexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
         if (field.isAnnotatedWith(ValueDeserialization.class)) {
             index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
                 value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
@@ -85,6 +104,27 @@ public class PathWriterIndexFactory {
             };
             index.putAll(doBuildIndex(field.type(), getPathForField(field, path), index, complexTypeSupplier));
         }
+    }
+
+    private Optional<TagPath> searchFieldsRecursivelyForTag(FieldReflector field) {
+        if (field.isAnnotatedWith(Tag.class)) {
+            return Optional.of(new TagPath(field.getAnnotation(Tag.class), field));
+        }
+
+        Class<?> fieldType = field.type();
+        Field[] fields = fieldType.getDeclaredFields();
+
+        for (Field subField : fields) {
+            FieldReflector subFieldReflector = new FieldReflector(subField);
+            if (BASIC_TYPES.contains(subField.getType())) {
+                if (subFieldReflector.isAnnotatedWith(Tag.class)) {
+                    return Optional.of(new TagPath(subFieldReflector.getAnnotation(Tag.class), subFieldReflector));
+                }
+                return Optional.empty();
+            }
+            return searchFieldsRecursivelyForTag(subFieldReflector);
+        }
+        return Optional.empty();
     }
 
     private void indexEnumType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
@@ -172,11 +212,17 @@ public class PathWriterIndexFactory {
     private Path getPathForField(FieldReflector field, Path path) {
         Tag tag = field.getAnnotation(Tag.class);
         if (tag != null) {
-            Path activePath = Path.parse(tag.path());
+            TagPath tagPath = new TagPath(tag, field);
+            Path activePath;
+            if (tagPath.isAbsolute()) {
+                activePath = Path.parse(tagPath.path());
+            } else {
+                activePath = path.append(Path.parse(tagPath.path()));
+            }
             if (tag.attribute().isEmpty()) {
                 return activePath;
             }
-            return activePath.appendAttribute(tag.attribute());
+            return activePath.appendAttribute(tagPath.attribute());
         }
         return path.append(field.name());
     }
