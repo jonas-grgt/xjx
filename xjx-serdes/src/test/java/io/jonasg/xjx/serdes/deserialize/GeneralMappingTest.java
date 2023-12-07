@@ -6,6 +6,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+
 public class GeneralMappingTest {
 
     @Test
@@ -22,9 +24,9 @@ public class GeneralMappingTest {
         UnMappedDataHolder unMappedDataHolder = new XjxSerdes().read(data, UnMappedDataHolder.class);
 
         // then
-        Assertions.assertThat(unMappedDataHolder.aDouble).isEqualTo(Double.valueOf(5.7));
-        Assertions.assertThat(unMappedDataHolder.unmappedNull).isNull();
-        Assertions.assertThat(unMappedDataHolder.unmappedInitialized).isEqualTo("initialized");
+        assertThat(unMappedDataHolder.aDouble).isEqualTo(Double.valueOf(5.7));
+        assertThat(unMappedDataHolder.unmappedNull).isNull();
+        assertThat(unMappedDataHolder.unmappedInitialized).isEqualTo("initialized");
     }
 
     static class UnMappedDataHolder {
@@ -50,7 +52,7 @@ public class GeneralMappingTest {
         NestedComplexTypeWithoutMappingDataHolder dataHolder = new XjxSerdes().read(data, NestedComplexTypeWithoutMappingDataHolder.class);
 
         // then
-        Assertions.assertThat(dataHolder.nestedComplexType.aDouble).isEqualTo(Double.valueOf(5.7));
+        assertThat(dataHolder.nestedComplexType.aDouble).isEqualTo(Double.valueOf(5.7));
     }
 
     static class NestedComplexTypeWithoutMappingDataHolder {
@@ -92,7 +94,7 @@ public class GeneralMappingTest {
         RelativeMappedParentDataHolder dataHolder = new XjxSerdes().read(data, RelativeMappedParentDataHolder.class);
 
         // then
-        Assertions.assertThat(dataHolder.week.day.highValue).isEqualTo(Double.valueOf(78));
+        assertThat(dataHolder.week.day.highValue).isEqualTo(Double.valueOf(78));
     }
 
     static class RelativeMappedParentDataHolder {
@@ -140,12 +142,55 @@ public class GeneralMappingTest {
         ThrowableAssert.ThrowingCallable deserializing = () -> new XjxSerdes().read(data, RelativeMappedWithoutParentTagDataHolder.class);
 
         // then
-        Assertions.assertThatThrownBy(deserializing)
+        assertThatThrownBy(deserializing)
                 .isInstanceOf(XjxDeserializationException.class)
                 .hasMessage("Field day is annotated with @Tag but one of it's parent is missing a @Tag.");
     }
 
     static class RelativeMappedWithoutParentTagDataHolder {
         Week week;
+    }
+
+    @Test
+    void fieldsNotAnnotatedWithTagShouldBeIgnored() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <Double>5.7</Double>
+                </DataTypes>
+                """;
+
+        // when
+        var holder = new XjxSerdes().read(data, FieldsWithoutTagAnnotationHolder.class);
+
+        // then
+        assertThat(holder.Double).isNull();
+    }
+
+    static class FieldsWithoutTagAnnotationHolder {
+        Double Double;
+    }
+
+    @Test
+    void ignorePathMappingsEndingWithSlash() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <Double>5.7</Double>
+                </DataTypes>
+                """;
+
+        // when
+        var holder = new XjxSerdes().read(data, SlashSuffixedHolder.class);
+
+        // then
+        assertThat(holder.Double).isEqualTo(5.7D);
+    }
+
+    static class SlashSuffixedHolder {
+        @Tag(path = "/DataTypes/Double/")
+        Double Double;
     }
 }
