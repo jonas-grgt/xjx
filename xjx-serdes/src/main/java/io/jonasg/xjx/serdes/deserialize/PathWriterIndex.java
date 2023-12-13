@@ -1,6 +1,5 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import java.util.List;
 import java.util.Map;
 
 public class PathWriterIndex {

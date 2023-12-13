@@ -120,7 +120,7 @@ public class ListDeserializationTest {
     }
 
     @Test
-    void deserializeIntoListField_EvenIfNoneOfTheInnerMappedFieldOfComplexTypeMatch() {
+    void deserializeIntoListField_EvenIfNoneOfTheInnerMappedFieldsOfComplexTypeCanBeMapped() {
         // given
         String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -260,5 +260,128 @@ public class ListDeserializationTest {
 
         @Tag(path = "/WeatherData/Forecasts/Day/High/Value")
         String maxTemperature;
+    }
+
+    @Test
+    void deserializeIntoListField_OfComplexType_ContainingRelativeMappedField() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Forecasts>
+                        <Day Date="2023-09-12">
+                            <High>
+                                <Value>71</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>60</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                        <Day Date="2023-09-13">
+                            <High>
+                                <Value>78</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>62</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                    </Forecast>
+                </WeatherData>
+                """;
+
+        // when
+        var weatherData = new XjxSerdes().read(data, WeatherDataRelativeMapping.class);
+
+        // then
+        Assertions.assertThat(weatherData.forecasts).hasSize(2);
+        Assertions.assertThat(weatherData.forecasts.get(0).maxTemperature).isEqualTo("71");
+        Assertions.assertThat(weatherData.forecasts.get(1).maxTemperature).isEqualTo("78");
+    }
+
+    public static class WeatherDataRelativeMapping {
+        public WeatherDataRelativeMapping() {
+        }
+
+        @Tag(path = "/WeatherData/Forecasts")
+        List<ForecastRelativeMapping> forecasts;
+    }
+
+    @Tag(path = "/WeatherData/Forecasts/Day")
+    public static class ForecastRelativeMapping {
+        public ForecastRelativeMapping() {
+        }
+
+        @Tag(path = "High/Value")
+        String maxTemperature;
+    }
+
+    @Test
+    void deserializeIntoListField_OfComplexType_ContainingRelativeAndAbsoluteMappedField() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Forecasts>
+                        <Day Date="2023-09-12">
+                            <High>
+                                <Value>71</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>60</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                        <Day Date="2023-09-13">
+                            <High>
+                                <Value>78</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>62</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                    </Forecast>
+                </WeatherData>
+                """;
+
+        // when
+        var weatherData = new XjxSerdes().read(data, WeatherDataRelativeAndAbsoluteMapping.class);
+
+        // then
+        Assertions.assertThat(weatherData.forecasts).hasSize(2);
+        Assertions.assertThat(weatherData.forecasts.get(0).maxTemperature).isEqualTo("71");
+        Assertions.assertThat(weatherData.forecasts.get(0).minTemperature).isEqualTo("60");
+        Assertions.assertThat(weatherData.forecasts.get(1).maxTemperature).isEqualTo("78");
+        Assertions.assertThat(weatherData.forecasts.get(1).minTemperature).isEqualTo("62");
+    }
+
+    public static class WeatherDataRelativeAndAbsoluteMapping {
+        public WeatherDataRelativeAndAbsoluteMapping() {
+        }
+
+        @Tag(path = "/WeatherData/Forecasts")
+        List<ForecastRelativeAndAbsoluteMapping> forecasts;
+    }
+
+    @Tag(path = "/WeatherData/Forecasts/Day")
+    public static class ForecastRelativeAndAbsoluteMapping {
+        public ForecastRelativeAndAbsoluteMapping() {
+        }
+
+        @Tag(path = "High/Value")
+        String maxTemperature;
+
+        @Tag(path = "/WeatherData/Forecasts/Day/Low/Value")
+        String minTemperature;
     }
 }

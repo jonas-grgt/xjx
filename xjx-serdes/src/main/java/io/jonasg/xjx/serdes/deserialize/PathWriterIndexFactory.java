@@ -203,7 +203,7 @@ public class PathWriterIndexFactory {
                 list.add(listTypeInstance);
                 return listTypeInstance;
             }));
-            doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
+            doBuildIndex(typeArgument, Path.parse(tag.path()), index, listTypeInstanceSupplier);
         } else {
             throw new XjxDeserializationException("Generics of type List require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
         }

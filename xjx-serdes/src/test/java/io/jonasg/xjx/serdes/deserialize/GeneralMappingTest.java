@@ -2,11 +2,11 @@ package io.jonasg.xjx.serdes.deserialize;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class GeneralMappingTest {
 
@@ -39,7 +39,7 @@ public class GeneralMappingTest {
     }
 
     @Test
-    void nestedComplexTypesDoNotNeedTopLevelMapping_EvenWhenContainingInnerMappings() {
+    void nestedComplexTypesDoNotNeedTopLevelMapping_WhenInnerMappingsContainAbsolutePaths() {
         // given
         String data = """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -191,6 +191,28 @@ public class GeneralMappingTest {
 
     static class SlashSuffixedHolder {
         @Tag(path = "/DataTypes/Double/")
+        Double Double;
+    }
+
+    @Test
+    void ignoreSufAndPrefixedWhiteSpaceInPathMappings() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <Double>5.7</Double>
+                </DataTypes>
+                """;
+
+        // when
+        var holder = new XjxSerdes().read(data, WhiteSpacePathMappingHolder.class);
+
+        // then
+        assertThat(holder.Double).isEqualTo(5.7D);
+    }
+
+    static class WhiteSpacePathMappingHolder {
+        @Tag(path = "   /DataTypes/Double   ")
         Double Double;
     }
 }

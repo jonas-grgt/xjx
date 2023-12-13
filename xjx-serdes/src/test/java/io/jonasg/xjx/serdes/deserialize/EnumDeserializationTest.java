@@ -5,8 +5,6 @@ import io.jonasg.xjx.serdes.XjxSerdes;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
 public class EnumDeserializationTest {
 
 

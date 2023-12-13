@@ -1,6 +1,5 @@
 package io.jonasg.xjx;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
