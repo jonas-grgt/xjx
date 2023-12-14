@@ -9,9 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: JReleaser
-        uses: jreleaser/release-action@2.4.1
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
