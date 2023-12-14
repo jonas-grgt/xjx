@@ -36,8 +36,8 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           export GPG_TTY=$(tty)
-          git config user.name "${{ secrets.COMMITTER_NAME }}"
-          git config user.email "${{ secrets.COMMITTER_EMAIL }}"
+          git config user.name "${{ env.COMMITTER_NAME }}"
+          git config user.email "${{ env.COMMITTER_EMAIL }}"
           mvn -B --file pom.xml release:prepare release:perform
 
       # Create a release
