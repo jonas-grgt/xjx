@@ -9,17 +9,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MapSaxHandler implements SaxHandler {
+public class MapRootSaxHandler implements SaxHandler {
 
     private final LinkedList<Map<String, Object>> mapsStack;
+
+    private final boolean skipRootTag;
+
+    private Map<String, Object> instance;
 
     private String characterData;
 
     private String prevStartTag;
 
-    public MapSaxHandler(HashMap<String, Object> instance) {
+    private String rootTag;
+
+    public MapRootSaxHandler(Map<String, Object> instance) {
         this.mapsStack = new LinkedList<>();
         this.mapsStack.add(instance);
+        this.skipRootTag = false;
+        this.instance = instance;
+    }
+
+    public MapRootSaxHandler(HashMap<String, Object> instance, boolean skipRootTag) {
+        this.mapsStack = new LinkedList<>();
+        this.mapsStack.add(instance);
+        this.skipRootTag = skipRootTag;
     }
 
     @Override
@@ -28,11 +42,16 @@ public class MapSaxHandler implements SaxHandler {
 
     @Override
     public void startTag(String namespace, String name, List<Attribute> attributes) {
-        Map<String, Object> activeMap = this.mapsStack.getLast();
-        Map<String, Object> newMap = new LinkedHashMap<>();
-        activeMap.put(name, newMap);
-        this.mapsStack.add(newMap);
-        this.prevStartTag = name;
+        if (this.rootTag != null || !skipRootTag) {
+            Map<String, Object> activeMap = this.mapsStack.getLast();
+            Map<String, Object> newMap = new LinkedHashMap<>();
+            activeMap.put(name, newMap);
+            this.mapsStack.add(newMap);
+            this.prevStartTag = name;
+        }
+        if (this.rootTag == null) {
+            this.rootTag = name;
+        }
     }
 
     @Override
@@ -52,5 +71,9 @@ public class MapSaxHandler implements SaxHandler {
     @Override
     public void characters(String data) {
         this.characterData = data;
+    }
+
+    public Map<String, Object> instance() {
+        return instance;
     }
 }

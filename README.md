@@ -130,7 +130,7 @@ class Temperature {
 ### Attributes
 
 
-### Collections
+### Collection types
 When deserializing XML data containing a collection type, the following conventions apply:
 
 - Only `List` and `Set` types are supported
@@ -179,3 +179,59 @@ public class Forecast {
     String minTemperature;
 }
 ```
+
+### Map types
+
+Maps can be deserialized either as a field or a top-level type. Consider the following XML document:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<WeatherData>
+    <CurrentConditions>
+        <Temperature>
+            <Value>75</Value>
+            <Unit>°F</Unit>
+        </Temperature>
+    </CurrentConditions>
+</WeatherData>
+```
+
+#### Option 1: Map a Specific Section
+
+You can map a specific section from the XML onto a custom field:
+
+```java
+class WeatherData {
+    @Tag(path = "/WeatherData/CurrentConditions")
+    Map<String, Object> map;
+}
+```
+In this case, the map field will contain:
+```java
+Map.of("Temperature", Map.of("Value", "75", "Unit", "°F"));
+```
+
+#### Option 2: Map the Whole Document
+
+Alternatively, you can map the entire document onto a Map of String Object
+```java
+class WeatherData {
+    @Tag(path = "/WeatherData")
+    Map<String, Object> map;
+}
+```
+In this case, the map field will contain:
+```java
+Map.of("CurrentConditions", 
+    Map.of("Temperature", Map.of("Value", "75", "Unit", "°F"))));
+```
+
+#### Option 3: Map to a Map
+```java
+Map<String, Object> map = new XjxSerdes().read(document, new MapOf<>() {});
+```
+In this case, the result of `read` will contain a Map of String Object
+```java
+Map.of("CurrentConditions", 
+    Map.of("Temperature", Map.of("Value", "75", "Unit", "°F"))));
+```
+

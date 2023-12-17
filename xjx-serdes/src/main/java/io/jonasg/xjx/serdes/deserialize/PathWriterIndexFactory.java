@@ -28,7 +28,7 @@ public class PathWriterIndexFactory {
     private static final List<Class<?>> BASIC_TYPES = List.of(
             String.class, Integer.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
             double.class, char.class, Character.class, LocalDate.class, LocalDateTime.class, ZonedDateTime.class);
-    private final Map<Class<?>, Object> listTypeCache = new HashMap<>();
+    private final Map<Class<?>, Object> collectionCacheType = new HashMap<>();
 
     public <T> Map<Path, PathWriter> createIndexForType(Class<T> type, String rootTag) {
         Path path = Path.of(rootTag);
@@ -38,7 +38,7 @@ public class PathWriterIndexFactory {
     private <T> Map<Path, PathWriter> buildIndex(Class<T> type, Path path) {
         Map<Path, PathWriter> index = new HashMap<>();
         T root = TypeReflector.reflect(type).instanceReflector().instance();
-        index.put(path, PathWriter.initializer(() -> root));
+        index.put(path, PathWriter.rootInitializer(() -> root));
         return doBuildIndex(type, path, index, () -> root);
     }
 
@@ -56,16 +56,42 @@ public class PathWriterIndexFactory {
         } else if (Set.class.equals(field.type())) {
             indexSetType(field, index, path, parent);
         } else if (Map.class.equals(field.type())) {
-            index.put(getPathForField(field, path), PathWriter.objectInitializer(() -> {
-                HashMap<Object, Object> map = new HashMap<>();
-                FieldAccessor.of(field, parent.get()).set(map);
-                return map;
-            }));
+            indexMapType(field, index, path, parent);
         } else if (field.type().isEnum()) {
             indexEnumType(field, index, path, parent);
         } else {
             indexComplexType(field, index, path, parent);
         }
+    }
+
+    private void indexMapType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+        Path pathForField = getPathForField(field, path);
+        if (pathForField.isRoot()) {
+            indexMapAsRootType(field, index, parent, pathForField);
+        } else {
+            doIndexMapType(field, index, parent, pathForField);
+        }
+    }
+
+    private static void doIndexMapType(FieldReflector field, Map<Path, PathWriter> index, Supplier<Object> parent, Path pathForField) {
+        index.put(pathForField, PathWriter.objectInitializer(() -> {
+            Map<String, Object> map = new HashMap<>();
+            Class<?> valueType = (Class<?>) ((ParameterizedType) field.genericType()).getActualTypeArguments()[1];
+            FieldAccessor.of(field, parent.get()).set(map);
+            if (valueType.equals(Object.class)) {
+                return map;
+            } else {
+                return new MapWithTypeInfo(map, valueType);
+            }
+        }));
+    }
+
+    private static void indexMapAsRootType(FieldReflector field, Map<Path, PathWriter> index, Supplier<Object> parent, Path pathForField) {
+        index.put(pathForField, PathWriter.rootInitializer(() -> {
+            Map<String, Object> map = new HashMap<>();
+            FieldAccessor.of(field, parent.get()).set(map);
+            return new MapAsRoot(parent.get(), map);
+        }));
     }
 
     private void indexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
@@ -94,11 +120,11 @@ public class PathWriterIndexFactory {
             }));
         } else {
             Supplier<Object> complexTypeSupplier = () -> {
-                if (listTypeCache.containsKey(field.type())) {
-                    return listTypeCache.get(field.type());
+                if (collectionCacheType.containsKey(field.type())) {
+                    return collectionCacheType.get(field.type());
                 }
                 Object complexType = TypeReflector.reflect(field.type()).instanceReflector().instance();
-                listTypeCache.put(field.type(), complexType);
+                collectionCacheType.put(field.type(), complexType);
                 FieldAccessor.of(field, parent.get()).set(complexType);
                 return complexType;
             };
@@ -156,32 +182,36 @@ public class PathWriterIndexFactory {
             return set;
         }));
         Type actualTypeArgument = ((ParameterizedType) field.genericType()).getActualTypeArguments()[0];
-        Class<?> typeArgument = (Class<?>) actualTypeArgument;
-        var tag = Reflector.reflect(typeArgument).annotation(Tag.class);
+        Class<?> type = (Class<?>) actualTypeArgument;
+        var tag = Reflector.reflect(type).annotation(Tag.class);
         if (tag != null) {
-            Supplier<Object> listTypeInstanceSupplier = () -> {
-                if (listTypeCache.get(typeArgument) != null) {
-                    return listTypeCache.get(typeArgument);
-                }
-                Object listTypeInstance = TypeReflector.reflect(typeArgument).instanceReflector().instance();
-                listTypeCache.put(typeArgument, listTypeInstance);
-                return listTypeInstance;
-            };
+            Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(type);
             index.put(Path.parse(tag.path()), PathWriter.objectInitializer(() -> {
-                listTypeCache.clear();
+                collectionCacheType.clear();
                 Object listTypeInstance = listTypeInstanceSupplier.get();
                 set.add(listTypeInstance);
                 return listTypeInstance;
             }));
-            doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
+            doBuildIndex(type, path, index, listTypeInstanceSupplier);
         } else {
-            throw new XjxDeserializationException("Generics of type Set require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
+            throw new XjxDeserializationException("Generics of type Set require @Tag pointing to mapped XML path (" + type.getSimpleName() + ")");
         }
     }
 
-    private void indexListType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+    private Supplier<Object> collectionSupplierForType(Class<?> typeArgument) {
+        return () -> {
+            if (collectionCacheType.get(typeArgument) != null) {
+                return collectionCacheType.get(typeArgument);
+            }
+            Object listTypeInstance = TypeReflector.reflect(typeArgument).instanceReflector().instance();
+            collectionCacheType.put(typeArgument, listTypeInstance);
+            return listTypeInstance;
+        };
+    }
+
+    private void indexListType(FieldReflector field, Map<Path, PathWriter> index, Path parentPath, Supplier<Object> parent) {
         List<Object> list = new ArrayList<>();
-        index.put(getPathForField(field, path), PathWriter.objectInitializer(() -> {
+        index.put(getPathForField(field, parentPath), PathWriter.objectInitializer(() -> {
             FieldAccessor.of(field, parent.get()).set(list);
             return list;
         }));
@@ -189,16 +219,9 @@ public class PathWriterIndexFactory {
         Class<?> typeArgument = (Class<?>) actualTypeArgument;
         var tag = Reflector.reflect(typeArgument).annotation(Tag.class);
         if (tag != null) {
-            Supplier<Object> listTypeInstanceSupplier = () -> {
-                if (listTypeCache.get(typeArgument) != null) {
-                    return listTypeCache.get(typeArgument);
-                }
-                Object listTypeInstance = TypeReflector.reflect(typeArgument).instanceReflector().instance();
-                listTypeCache.put(typeArgument, listTypeInstance);
-                return listTypeInstance;
-            };
+            Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(typeArgument);
             index.put(Path.parse(tag.path()), PathWriter.objectInitializer(() -> {
-                listTypeCache.clear();
+                collectionCacheType.clear();
                 Object listTypeInstance = listTypeInstanceSupplier.get();
                 list.add(listTypeInstance);
                 return listTypeInstance;
@@ -226,5 +249,4 @@ public class PathWriterIndexFactory {
         }
         return path.append(field.name());
     }
-
 }

@@ -80,4 +80,8 @@ public class Path {
     public String toString() {
         return "/" + String.join("/", sections) + (attribute == null ? "" : "[" + attribute + "]");
     }
+
+    public boolean isRoot() {
+        return sections.size() == 1;
+    }
 }

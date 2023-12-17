@@ -11,6 +11,10 @@
         <module>xjx-serdes</module>
     </modules>
 
+    <name>xjx</name>
+    <description>Lightweight XML library for Java</description>
+    <url>https://github.com/jonasgeiregat/xjx</url>
+
     <licenses>
         <license>
             <name>GPL-v3.0</name>
@@ -127,6 +131,16 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <pomElements>
+                        <url/>
+                        <name/>
+                        <description/>
+                        <scm/>
+                        <developers/>
+                        <inceptionYear/>
+                    </pomElements>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jreleaser</groupId>

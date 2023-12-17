@@ -2,7 +2,7 @@ package io.jonasg.xjx.serdes.deserialize;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
-import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class DataTypeDeserializationTest {
 
@@ -30,7 +34,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.String).isEqualTo("11");
+        assertThat(dataTypes.String).isEqualTo("11");
     }
 
 
@@ -48,7 +52,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.Integer).isEqualTo(11);
+        assertThat(dataTypes.Integer).isEqualTo(11);
     }
 
     @Test
@@ -65,7 +69,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.Long).isEqualTo(Long.valueOf(12));
+        assertThat(dataTypes.Long).isEqualTo(Long.valueOf(12));
     }
 
     @Test
@@ -82,7 +86,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveLong).isEqualTo(12L);
+        assertThat(dataTypes.primitiveLong).isEqualTo(12L);
     }
 
     @Test
@@ -99,7 +103,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.Double).isEqualTo(Double.valueOf(5.7));
+        assertThat(dataTypes.Double).isEqualTo(Double.valueOf(5.7));
     }
 
 
@@ -117,7 +121,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveDouble).isEqualTo(7.7);
+        assertThat(dataTypes.primitiveDouble).isEqualTo(7.7);
     }
 
     @Test
@@ -134,7 +138,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.BigDecimal).isEqualTo(BigDecimal.valueOf(4.7));
+        assertThat(dataTypes.BigDecimal).isEqualTo(BigDecimal.valueOf(4.7));
     }
 
     @Test
@@ -151,7 +155,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.Character).isEqualTo(Character.valueOf('A'));
+        assertThat(dataTypes.Character).isEqualTo(Character.valueOf('A'));
     }
 
     @Test
@@ -168,7 +172,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveChar).isEqualTo('A');
+        assertThat(dataTypes.primitiveChar).isEqualTo('A');
     }
 
     @Test
@@ -185,7 +189,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.multipleChar).isEqualTo('C');
+        assertThat(dataTypes.multipleChar).isEqualTo('C');
     }
 
     @Test
@@ -202,7 +206,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.multipleCharacter)
+        assertThat(dataTypes.multipleCharacter)
                 .isInstanceOf(Character.class)
                 .isEqualTo('C');
     }
@@ -221,7 +225,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.LocalDate).isEqualTo(LocalDate.of(1985, 11, 1));
+        assertThat(dataTypes.LocalDate).isEqualTo(LocalDate.of(1985, 11, 1));
     }
 
     @Test
@@ -237,7 +241,7 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.LocalDateTime).isEqualTo(LocalDateTime.of(1985, 11, 1, 19, 12, 10));
+        assertThat(dataTypes.LocalDateTime).isEqualTo(LocalDateTime.of(1985, 11, 1, 19, 12, 10));
     }
 
     @Test
@@ -253,12 +257,12 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.ZonedDateTime)
+        assertThat(dataTypes.ZonedDateTime)
                 .isEqualTo(ZonedDateTime.of(LocalDateTime.of(1985, 11, 1, 19, 12, 10), ZoneId.of("Europe/Brussels")));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"True","true","1","yes","YeS"})
+    @ValueSource(strings = {"True", "true", "1", "yes", "YeS"})
     void deserializeTrueValuesFor_booleanField(String value) {
         // given
         String data = """
@@ -272,13 +276,13 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.BooleanTrue).isTrue();
-        Assertions.assertThat(dataTypes.booleanTrue).isTrue();
+        assertThat(dataTypes.BooleanTrue).isTrue();
+        assertThat(dataTypes.booleanTrue).isTrue();
     }
 
 
     @ParameterizedTest
-    @ValueSource(strings = {"False","false","0","no","No"})
+    @ValueSource(strings = {"False", "false", "0", "no", "No"})
     void deserializeFalseValuesFor_booleanField(String value) {
         // given
         String data = """
@@ -292,16 +296,22 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.BooleanFalse).isFalse();
-        Assertions.assertThat(dataTypes.booleanFalse).isFalse();
+        assertThat(dataTypes.BooleanFalse).isFalse();
+        assertThat(dataTypes.booleanFalse).isFalse();
     }
 
     @Test
-    void deserialize_MapField() {
+    void deserialize_SectionOfDocument_toMapField() {
         // given
         String data = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <DataTypes>
+                    <MapB>
+                        <MapAB>
+                            <MapC>Value1</MapC>
+                            <MapD>Value2</MapD>
+                        </MapAB>
+                    </MapB>
                     <MapA>
                         <MapAB>
                             <MapC>Value1</MapC>
@@ -323,11 +333,169 @@ public class DataTypeDeserializationTest {
         DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
         // then
-        Assertions.assertThat(dataTypes.map)
+        assertThat(dataTypes.map)
                 .isEqualTo(Map.of(
                         "MapAB", Map.of("MapC", "Value1", "MapD", "Value2"),
                         "MapAC", Map.of("MapC", "Value3", "MapD", "Value4"),
                         "MapAD", Map.of("MapC", Map.of("MapD", "Value5"))));
+    }
+
+    @Test
+    void deserialize_wholeDocumentStartingFromTheRoot_toMapField() {
+        // given
+        String document = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Location>
+                        <City>New York</City>
+                        <Country>USA</Country>
+                    </Location>
+                    <CurrentConditions>
+                        <Temperature>
+                            <Value>75</Value>
+                            <Unit>°F</Unit>
+                        </Temperature>
+                        <WeatherCondition>Sunny</WeatherCondition>
+                    </CurrentConditions>
+                </WeatherData>""";
+
+
+        // when
+        var dataTypes = new XjxSerdes().read(document, DataTypes.class);
+
+        // then
+        assertThat(dataTypes.mapRoot)
+                .isEqualTo(Map.of(
+                        "Location", Map.of(
+                                "City", "New York", "Country", "USA"),
+                        "CurrentConditions", Map.of(
+                                "Temperature", Map.of("Value", "75", "Unit", "°F"), "WeatherCondition", "Sunny")));
+        // and is can map to other fields
+        assertThat(dataTypes.city).isEqualTo("New York");
+    }
+
+    @Test
+    void deserialize_wholeDocumentStartingFromTheRoot_toMapFieldWithCustomValueType() {
+        // given
+        String document = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Location>
+                        <City>New York</City>
+                        <Country>USA</Country>
+                    </Location>
+                    <Measures>
+                        <MeasureA>
+                            <Value>75</Value>
+                            <Unit>°F</Unit>
+                        </MeasureA>
+                        <MeasureB>
+                            <Value>76</Value>
+                            <Unit>°F</Unit>
+                        </MeasureB>
+                        <MeasureC>
+                            <Value>77</Value>
+                            <Unit>°F</Unit>
+                        </MeasureC>
+                    </Measures>
+                </WeatherData>""";
+
+
+        // when
+        var dataTypes = new XjxSerdes().read(document, DataTypes.class);
+
+        // then
+        assertThat(dataTypes.mapCustomValue)
+                .isEqualTo(Map.of(
+                        "MeasureA", new Measure("75", "°F"),
+                        "MeasureB", new Measure("76", "°F"),
+                        "MeasureC", new Measure("77", "°F")));
+    }
+
+    @Test
+    void deserialize_toMap() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <MapAB>
+                        <MapC>Value1</MapC>
+                        <MapD>Value2</MapD>
+                    </MapAB>
+                    <MapAC>
+                        <MapC>Value3</MapC>
+                        <MapD>Value4</MapD>
+                    </MapAC>
+                    <MapAD>
+                        <MapC>
+                            <MapD>Value5</MapD>
+                        </MapC>
+                        <MapD>
+                            <MapDA>
+                                <MapA>Value6</MapA>
+                            </MapDA>
+                        </MapD>
+                    </MapAD>
+                </DataTypes>
+                """;
+        // when
+        Map<String, Object> map = new XjxSerdes().read(data, new MapOf<>() {
+        });
+
+        // then
+        assertThat(map)
+                .isEqualTo(Map.of(
+                        "MapAB", Map.of("MapC", "Value1", "MapD", "Value2"),
+                        "MapAC", Map.of("MapC", "Value3", "MapD", "Value4"),
+                        "MapAD", Map.of(
+                                "MapC", Map.of("MapD", "Value5"),
+                                "MapD", Map.of("MapDA", Map.of("MapA", "Value6")))));
+    }
+
+    @Test
+    @SuppressWarnings("unused")
+    void deserialize_toMapOf_shouldOnlySupportStringAsKey() {
+        ThrowableAssert.ThrowingCallable readWithNoneStringKey = () -> new XjxSerdes().read("", new MapOf<BigDecimal, Object>() {
+        });
+
+        assertThatThrownBy(readWithNoneStringKey)
+                .isInstanceOf(XjxDeserializationException.class)
+                .hasMessage("Maps only support String as key");
+    }
+
+    static class Measure {
+        @Tag(path = "Value")
+        private String temperature;
+
+        @Tag(path = "Unit")
+        private String unit;
+
+        private Measure() {
+        }
+
+        public Measure(String temperature, String unit) {
+            this.temperature = temperature;
+            this.unit = unit;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Measure measure = (Measure) o;
+
+            if (!Objects.equals(temperature, measure.temperature))
+                return false;
+            return Objects.equals(unit, measure.unit);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = temperature != null ? temperature.hashCode() : 0;
+            result = 31 * result + (unit != null ? unit.hashCode() : 0);
+            return result;
+        }
     }
 
     static class DataTypes {
@@ -376,6 +544,15 @@ public class DataTypeDeserializationTest {
 
         @Tag(path = "/DataTypes/MapA")
         Map<String, Object> map;
+
+        @Tag(path = "/WeatherData")
+        Map<String, Object> mapRoot;
+
+        @Tag(path = "/WeatherData/Location/City")
+        String city;
+
+        @Tag(path = "/WeatherData/Measures")
+        Map<String, Measure> mapCustomValue;
 
         @Tag(path = "/DataTypes/BooleanTrue")
         Boolean BooleanTrue;

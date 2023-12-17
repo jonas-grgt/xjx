@@ -8,6 +8,9 @@
     </parent>
 
     <artifactId>xjx-sax</artifactId>
+    <name>xjx-sax</name>
+    <description>SAX based XML parser</description>
+    <url>https://github.com/jonasgeiregat/xjx</url>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

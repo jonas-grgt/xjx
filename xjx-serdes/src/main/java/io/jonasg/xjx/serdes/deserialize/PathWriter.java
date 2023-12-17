@@ -5,15 +5,15 @@ import java.util.function.Supplier;
 
 public class PathWriter {
 
-    private Supplier<Object> initializer;
+    private Supplier<Object> rootInitializer;
 
     private Supplier<Object> objectInitializer;
 
     private Consumer<Object> valueInitializer;
 
-    public static PathWriter initializer(Supplier<Object> initializer) {
+    public static PathWriter rootInitializer(Supplier<Object> rootInitializer) {
         PathWriter pathWriter = new PathWriter();
-        pathWriter.initializer = initializer;
+        pathWriter.rootInitializer = rootInitializer;
         return pathWriter;
     }
 
@@ -29,8 +29,8 @@ public class PathWriter {
         return pathWriter;
     }
 
-    public Supplier<Object> getInitializer() {
-        return initializer;
+    public Supplier<Object> getRootInitializer() {
+        return rootInitializer;
     }
 
     public Supplier<Object> getObjectInitializer() {

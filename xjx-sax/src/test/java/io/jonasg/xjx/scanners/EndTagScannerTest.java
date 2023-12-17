@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.ArrayList;
 
+import static org.assertj.core.api.Assertions.*;
+
 class EndTagScannerTest {
 
 
@@ -22,7 +24,7 @@ class EndTagScannerTest {
         ThrowableAssert.ThrowingCallable act = () -> endTagAction.scan(new BufferedPositionedReader(new StringReader("home</a>")), t -> {});
 
         // then
-        Assertions.assertThatThrownBy(act)
+        assertThatThrownBy(act)
                 .isInstanceOf(XmlParsingException.class)
                 .hasMessage("End tag does not start with </ in: 'home</a>'");
     }
@@ -37,7 +39,7 @@ class EndTagScannerTest {
         endTagAction.scan(new BufferedPositionedReader(new StringReader("</a>")), tokens::add);
 
         // then
-        Assertions.assertThat(tokens).containsExactly(new Token<>(Token.Type.END_TAG, new EndTag("a")));
+        assertThat(tokens).containsExactly(new Token<>(Token.Type.END_TAG, new EndTag(null, "a")));
     }
 
 
@@ -51,7 +53,7 @@ class EndTagScannerTest {
         endTagAction.scan(new BufferedPositionedReader(new StringReader("</a:b>")), tokens::add);
 
         // then
-        Assertions.assertThat(tokens).containsExactly(new Token<>(Token.Type.END_TAG, new EndTag("a", "b")));
+        assertThat(tokens).containsExactly(new Token<>(Token.Type.END_TAG, new EndTag("a", "b")));
     }
 
 }
