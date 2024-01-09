@@ -47,7 +47,7 @@ public class FieldReflector {
         return field.getAnnotation(clazz);
     }
 
-    public <T extends Annotation> boolean isAnnotatedWith(Class<T> annotation) {
+    public <T extends Annotation> boolean hasAnnotation(Class<T> annotation) {
         return field.getAnnotation(annotation) != null;
     }
 

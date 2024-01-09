@@ -1,5 +1,5 @@
 # Xjx 
-Streamlined XML serdes library: No Dependencies, Just Simplicity
+XML serializing and deserializing (serdes) library: No Dependencies, Just Simplicity
 
 # 🤔 Why
 The "why" behind Xjx is rooted in the necessity for a minimalist, actively maintained XML-to-Java and vice versa library. 
@@ -12,12 +12,12 @@ Xjx exists out of two modules:
 # 🔑 Key Features
 - Explicitly map fields to specific tags using `@Tag`
 - Select specific tags using an **XPath** like expression `@Tag(path = "/WeatherData/Location/City)`
-- Out of the box support for most common data types
+- Out-of-the-box support for most common data types
 - Explicit deserialization of values using `@ValueDeserialization`
 
 # ✨ xjx-serdes
 
-Contains the XML serializer (TODO) and deserialization code.
+Contains the XML serializer and deserializer.
 
 ## ⚙️ Installation
 
@@ -25,7 +25,7 @@ Contains the XML serializer (TODO) and deserialization code.
 <dependency>
     <groupId>io.jonasg</groupId>
     <artifactId>xjx-serdes</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -79,7 +79,10 @@ String document = """
     </WeatherData>""";
 
 
-var weatherData = new XjxSerdes().read(document, WeatherData.class);
+var xjx = new XjxSerdes();
+WeatherData weatherData = xjx.read(document, WeatherData.class);
+
+String xmlDocument = xjx.write(weatherData);
 ```
 ## General deserialization rules
 Deserialization is guided by the use of the `@Tag` annotation. Fields annotated with `@Tag` are candidates for deserialization, while unannotated fields are ignored.
@@ -235,3 +238,29 @@ Map.of("CurrentConditions",
     Map.of("Temperature", Map.of("Value", "75", "Unit", "°F"))));
 ```
 
+## General serialization rules
+
+Fields annotated with `@Tag` are considered for serialization, while unannotated fields are ignored.
+### Path Expressions
+Fields are serialized based on the path property specified in the @Tag annotation. 
+The path property uses an XPath-like expression to determine the location of the field within the XML document.
+
+```java
+class WeatherData {
+    @Tag(path = "/WeatherData/Location/Country")
+    private final String country;
+
+    @Tag(path = "/WeatherData/Location/City/Name")
+    private final String city;
+
+    // Constructor and other methods are omitted for brevity
+}
+```
+
+In this example, the country field is serialized to <Country> within the specified path,
+and the city field is serialized to <City><Name>.
+
+## Null Fields
+
+Null fields are serialized as self-closing tags by default.
+If a field is null, the corresponding XML tag is included, but the tag content is empty.

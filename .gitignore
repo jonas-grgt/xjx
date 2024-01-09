@@ -40,3 +40,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Jreleaser
+out/
+trace.log

@@ -3,6 +3,8 @@ package io.jonasg.xjx.serdes.reflector;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class InstanceReflector<T> {
 
@@ -50,6 +52,14 @@ public class InstanceReflector<T> {
     public void setField(String fieldName, Object value) {
         typeReflector.field(fieldName)
                 .ifPresent(f -> f.set(instance, value));
+    }
+
+    public List<InstanceField> fields(Predicate<InstanceField> predicate) {
+        return typeReflector.fields()
+                .stream()
+                .map(f -> new InstanceField(f, instance))
+                .filter(predicate)
+                .toList();
     }
 
     public T instance() {

@@ -5,7 +5,7 @@ import io.jonasg.xjx.serdes.XjxSerdes;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class FieldAccessTest {
+public class DeserializationFieldAccessTest {
 
     @Test
     void accessThroughPublicField() {

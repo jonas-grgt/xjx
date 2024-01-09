@@ -95,7 +95,7 @@ public class PathWriterIndexFactory {
     }
 
     private void indexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
-        if (field.isAnnotatedWith(Tag.class)) {
+        if (field.hasAnnotation(Tag.class)) {
             doIndexComplexType(field, index, path, parent);
         } else {
             searchFieldsRecursivelyForTag(field)
@@ -112,7 +112,7 @@ public class PathWriterIndexFactory {
     }
 
     private void doIndexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
-        if (field.isAnnotatedWith(ValueDeserialization.class)) {
+        if (field.hasAnnotation(ValueDeserialization.class)) {
             index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
                 value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
                         .orElse(value);
@@ -133,7 +133,7 @@ public class PathWriterIndexFactory {
     }
 
     private Optional<TagPath> searchFieldsRecursivelyForTag(FieldReflector field) {
-        if (field.isAnnotatedWith(Tag.class)) {
+        if (field.hasAnnotation(Tag.class)) {
             return Optional.of(new TagPath(field.getAnnotation(Tag.class), field));
         }
 
@@ -143,7 +143,7 @@ public class PathWriterIndexFactory {
         for (Field subField : fields) {
             FieldReflector subFieldReflector = new FieldReflector(subField);
             if (BASIC_TYPES.contains(subField.getType())) {
-                if (subFieldReflector.isAnnotatedWith(Tag.class)) {
+                if (subFieldReflector.hasAnnotation(Tag.class)) {
                     return Optional.of(new TagPath(subFieldReflector.getAnnotation(Tag.class), subFieldReflector));
                 }
                 return Optional.empty();
@@ -155,7 +155,7 @@ public class PathWriterIndexFactory {
 
     private void indexEnumType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
         index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
-            if (field.isAnnotatedWith(ValueDeserialization.class)) {
+            if (field.hasAnnotation(ValueDeserialization.class)) {
                 value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
                         .orElse(value);
             }
@@ -164,7 +164,7 @@ public class PathWriterIndexFactory {
     }
 
     private void indexSimpleType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
-        if (field.isAnnotatedWith(Tag.class)) {
+        if (field.hasAnnotation(Tag.class)) {
             index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
                 if (value instanceof String) {
                     value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)

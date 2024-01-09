@@ -21,16 +21,20 @@ public class XjxSerdes {
 
     private final PathWriterIndexFactory pathWriterIndexFactory;
 
-    private XjxSerdes(SaxParser saxParser, PathWriterIndexFactory pathWriterIndexFactory) {
+    private final XmlNodeStructureFactory xmlNodeStructureFactory = new XmlNodeStructureFactory();
+    private final XmlStringBuilder xmlStringBuilder;
+
+    private XjxSerdes(SaxParser saxParser, PathWriterIndexFactory pathWriterIndexFactory, XmlStringBuilder xmlStringBuilder) {
         this.saxParser = saxParser;
         this.pathWriterIndexFactory = pathWriterIndexFactory;
+        this.xmlStringBuilder = xmlStringBuilder;
     }
 
     /**
      * Constructs an XjxSerdes instance with default configurations.
      */
     public XjxSerdes() {
-        this(new SaxParser(), new PathWriterIndexFactory());
+        this(new SaxParser(), new PathWriterIndexFactory(), new XmlStringBuilder());
     }
 
     /**
@@ -92,4 +96,17 @@ public class XjxSerdes {
         }
         throw new XjxDeserializationException("Maps only support String as key");
     }
+
+    /**
+     * Writes an object to an XML document.
+     *
+     * @param data The object to serialize to XML.
+     * @param <T>  The generic type of the object.
+     * @return The XML representation of the object.
+     */
+    public <T> String write(T data) {
+        var nodes = xmlNodeStructureFactory.build(data);
+        return xmlStringBuilder.build(nodes);
+    }
+
 }

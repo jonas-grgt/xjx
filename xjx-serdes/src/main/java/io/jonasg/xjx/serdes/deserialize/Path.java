@@ -1,10 +1,13 @@
 package io.jonasg.xjx.serdes.deserialize;
 
+import io.jonasg.xjx.serdes.Section;
+
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 
-public class Path {
+public class Path implements Iterable<Section> {
 
     private final LinkedList<String> sections = new LinkedList<>();
 
@@ -58,6 +61,30 @@ public class Path {
         }
     }
 
+    public String getRoot() {
+        return sections.getFirst();
+    }
+
+    public int size() {
+        return sections.size();
+    }
+
+    public boolean isRoot() {
+        return sections.size() == 1;
+    }
+
+    public Section getSection(int position) {
+        return new Section(this.sections.get(position), position == this.sections.size() - 1);
+    }
+
+    @Override
+    public Iterator<Section> iterator() {
+        int size = sections.size();
+        return sections.stream()
+                .map(s -> new Section(s, sections.indexOf(s) == size - 1))
+                .iterator();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,9 +106,5 @@ public class Path {
     @Override
     public String toString() {
         return "/" + String.join("/", sections) + (attribute == null ? "" : "[" + attribute + "]");
-    }
-
-    public boolean isRoot() {
-        return sections.size() == 1;
     }
 }

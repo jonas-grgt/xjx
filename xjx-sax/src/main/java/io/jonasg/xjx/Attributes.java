@@ -1,12 +1,13 @@
 package io.jonasg.xjx;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 public class Attributes {
-    private final Map<String, String> attributes = new HashMap<>();
+    private final Map<String, String> attributes = new LinkedHashMap<>();
 
     public Attributes(String... values) {
         int length = values.length;
@@ -38,6 +39,10 @@ public class Attributes {
         return attributes.entrySet()
                 .stream()
                 .map(e -> new Attribute(e.getKey(), e.getValue()));
+    }
+
+    public boolean isEmpty() {
+        return attributes.isEmpty();
     }
 
 

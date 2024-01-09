@@ -2,7 +2,7 @@ package io.jonasg.xjx.serdes.reflector;
 
 public class Reflector {
 
-    public <T> InstanceReflector<T> reflect(T instance) {
+    public static <T> InstanceReflector<T> reflect(T instance) {
         return new InstanceReflector<>(instance);
     }
 
