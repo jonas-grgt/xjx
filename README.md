@@ -61,21 +61,21 @@ public class Location {
 String document = """
     <?xml version="1.0" encoding="UTF-8"?>
     <WeatherData>
-        <Location>
-            <City>New York</City>
-            <Country>USA</Country>
-        </Location>
-        <CurrentConditions>
-            <Temperature>
-                <Value>75</Value>
-                <Unit>°F</Unit>
-            </Temperature>
-            <Humidity>
-                <Value>60</Value>
-                <Unit>%</Unit>
-            </Humidity>
-            <WeatherCondition>Sunny</WeatherCondition>
-        </CurrentConditions>
+      <Location>
+          <City>New York</City>
+          <Country>USA</Country>
+      </Location>
+      <CurrentConditions>
+        <Temperature>
+          <Value>75</Value>
+            <Unit>°F</Unit>
+        </Temperature>
+        <Humidity>
+          <Value>60</Value>
+          <Unit>%</Unit>
+        </Humidity>
+        <WeatherCondition>Sunny</WeatherCondition>
+      </CurrentConditions>
     </WeatherData>""";
 
 
@@ -92,8 +92,8 @@ Each `@Tag` annotation must include a `path` property, using an XPath-like expre
 
 ### Path Expressions
 
-Path expressions can be absolute, starting with a slash, representing a path from the root tag to the mapped tag.
-Relative paths, without a starting slash, require a parent to be mapped absolutely.
+Path expressions can be **absolute**, starting with a slash, representing a path from the root tag to the mapped tag.
+**Relative** paths, without a starting slash, require a parent to be mapped absolutely.
 
 ```java
 import java.math.BigDecimal;
@@ -167,10 +167,14 @@ When deserializing XML data containing a collection type, the following conventi
 
 ```java
 public class WeatherData {
+    // When mapping List or Set the type needs to point to the
+    // tag containing the repeated elements
     @Tag(path = "/WeatherData/Forecasts")
     List<Forecast> forecasts;
 }
 
+// Top level annoation is required and 
+// needs to point to an indiviual element that is repeated
 @Tag(path = "/WeatherData/Forecasts/Day")
 public class Forecast {
     // field can be both absolutely as relatively mapped
@@ -257,8 +261,26 @@ class WeatherData {
 }
 ```
 
-In this example, the country field is serialized to <Country> within the specified path,
-and the city field is serialized to <City><Name>.
+Given that the above object is fully populated
+
+```java
+var weatherData = new WeatherData("Belgium", "Ghent");
+```
+The serialized result
+```java
+new XjxSerdes().write(weatherData);
+```
+Would look like:
+```xml
+<Weatherdata>
+  <Location>
+    <Country>Belgium</Country>
+      <City>
+       <Name>Ghent</Name>
+      </City>
+  </Location>
+</Weatherdata>
+```
 
 ## Null Fields
 
