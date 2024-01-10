@@ -23,6 +23,10 @@ public class PathWriter {
         return pathWriter;
     }
 
+    public void setRootInitializer(Supplier<Object> rootInitializer) {
+        this.rootInitializer = rootInitializer;
+    }
+
     public static PathWriter valueInitializer(Consumer<Object> o) {
         PathWriter pathWriter = new PathWriter();
         pathWriter.valueInitializer = o;

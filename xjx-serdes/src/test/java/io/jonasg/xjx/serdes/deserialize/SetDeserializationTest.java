@@ -6,9 +6,10 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SetDeserializationTest {
     @Test
@@ -302,12 +303,11 @@ public class SetDeserializationTest {
                 """;
 
         // when
-        var weatherData = new XjxSerdes().read(data, ListDeserializationTest.WeatherDataRelativeMapping.class);
+        var weatherData = new XjxSerdes().read(data, WeatherDataRelativeMapping.class);
 
         // then
         Assertions.assertThat(weatherData.forecasts).hasSize(2);
-        Assertions.assertThat(weatherData.forecasts.get(0).maxTemperature).isEqualTo("71");
-        Assertions.assertThat(weatherData.forecasts.get(1).maxTemperature).isEqualTo("78");
+        Assertions.assertThat(weatherData.forecasts).extracting(r -> r.maxTemperature).containsExactlyInAnyOrder("78", "71");
     }
 
     public static class WeatherDataRelativeMapping {
@@ -315,7 +315,7 @@ public class SetDeserializationTest {
         }
 
         @Tag(path = "/WeatherData/Forecasts")
-        Set<ListDeserializationTest.ForecastRelativeMapping> forecasts;
+        Set<ForecastRelativeMapping> forecasts;
     }
 
     @Tag(path = "/WeatherData/Forecasts/Day")
@@ -361,14 +361,12 @@ public class SetDeserializationTest {
                 """;
 
         // when
-        var weatherData = new XjxSerdes().read(data, ListDeserializationTest.WeatherDataRelativeAndAbsoluteMapping.class);
+        var weatherData = new XjxSerdes().read(data, WeatherDataRelativeAndAbsoluteMapping.class);
 
         // then
         Assertions.assertThat(weatherData.forecasts).hasSize(2);
-        Assertions.assertThat(weatherData.forecasts.get(0).maxTemperature).isEqualTo("71");
-        Assertions.assertThat(weatherData.forecasts.get(0).minTemperature).isEqualTo("60");
-        Assertions.assertThat(weatherData.forecasts.get(1).maxTemperature).isEqualTo("78");
-        Assertions.assertThat(weatherData.forecasts.get(1).minTemperature).isEqualTo("62");
+        Assertions.assertThat(weatherData.forecasts).extracting(r -> r.maxTemperature).containsExactlyInAnyOrder("78", "71");
+        Assertions.assertThat(weatherData.forecasts).extracting(r -> r.minTemperature).containsExactlyInAnyOrder("62", "60");
     }
 
     public static class WeatherDataRelativeAndAbsoluteMapping {
@@ -376,7 +374,7 @@ public class SetDeserializationTest {
         }
 
         @Tag(path = "/WeatherData/Forecasts")
-        Set<ListDeserializationTest.ForecastRelativeAndAbsoluteMapping> forecasts;
+        Set<ForecastRelativeAndAbsoluteMapping> forecasts;
     }
 
     @Tag(path = "/WeatherData/Forecasts/Day")
@@ -389,6 +387,63 @@ public class SetDeserializationTest {
 
         @Tag(path = "/WeatherData/Forecasts/Day/Low/Value")
         String minTemperature;
+    }
+
+    @Test
+    void deserializeIntoSetField_whereRootTagContainsRepeatedElements() {
+        // given
+        String xmlDoc = """
+                <gpx
+                        version="1.0"
+                        creator="ExpertGPS 1.1 - https://www.topografix.com"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xmlns="http://www.topografix.com/GPX/1/0"
+                        xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
+                    <wpt lat="42.438878" lon="-71.119277">
+                        <ele>44.586548</ele>
+                        <time>2001-11-28T21:05:28Z</time>
+                        <name>5066</name>
+                        <desc><![CDATA[5066]]></desc>
+                        <sym>Crossing</sym>
+                        <type><![CDATA[Crossing]]></type>
+                    </wpt>
+                    <wpt lat="42.439227" lon="-71.119689">
+                        <ele>57.607200</ele>
+                        <time>2001-06-02T03:26:55Z</time>
+                        <name>5067</name>
+                        <desc><![CDATA[5067]]></desc>
+                        <sym>Dot</sym>
+                        <type><![CDATA[Intersection]]></type>
+                    </wpt>
+                </gpx>""";
+
+        // when
+        var gpx = new XjxSerdes().read(xmlDoc, Gpx.class);
+
+        // then
+        assertThat(gpx.wayPoints).hasSize(2);
+        Assertions.assertThat(gpx.wayPoints).extracting(r -> r.description).containsExactlyInAnyOrder("5066", "5067");
+        Assertions.assertThat(gpx.wayPoints).extracting(r -> r.time).containsExactlyInAnyOrder("2001-11-28T21:05:28Z", "2001-06-02T03:26:55Z");
+    }
+
+    static class Gpx {
+        public Gpx() {
+        }
+
+        @Tag(path = "/gpx")
+        Set<Wpt> wayPoints;
+    }
+
+    @Tag(path = "/gpx/wpt")
+    static class Wpt {
+        public Wpt() {
+        }
+
+        @Tag(path = "/gpx/wpt/desc")
+        String description;
+
+        @Tag(path = "time")
+        String time;
     }
 
 }

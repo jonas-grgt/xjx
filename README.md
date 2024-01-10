@@ -1,5 +1,5 @@
-# Xjx 
-XML serializing and deserializing (serdes) library: No Dependencies, Just Simplicity
+# 🙅 Xjx 
+Java - XML serializing and deserializing (serdes) library: No Dependencies, Just Simplicity
 
 # 🤔 Why
 The "why" behind Xjx is rooted in the necessity for a minimalist, actively maintained XML-to-Java and vice versa library. 
