@@ -12,6 +12,40 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SetDeserializationTest {
+
+    @Test
+    void deserializeIntoListField_OfStringType() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <Strings>
+                        <String>2023-09-12</String>
+                        <String>2023-09-13</String>
+                        <String>2023-09-14</String>
+                        <String>2023-09-15</String>
+                    </Strings>
+                </Data>
+                """;
+
+        // when
+        var dataHolder = new XjxSerdes().read(data, ListOfStrings.class);
+
+        // then
+        assertThat(dataHolder.strings).containsExactlyInAnyOrder(
+                "2023-09-12",
+                "2023-09-13",
+                "2023-09-14",
+                "2023-09-15"
+        );
+    }
+
+    static class ListOfStrings {
+        @Tag(path = "/Data/Strings", items = "String")
+        Set<String> strings;
+    }
+
+
     @Test
     void deserializeIntoSetField_OfComplexType_ContainingTopLevelMapping() {
         // given
@@ -57,14 +91,13 @@ public class SetDeserializationTest {
     }
 
     public static class WeatherData {
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         Set<Forecast> forecasts;
 
         public WeatherData() {
         }
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     public static class Forecast {
 
         @Tag(path = "/WeatherData/Forecasts/Day/High/Value")
@@ -150,12 +183,11 @@ public class SetDeserializationTest {
         public PrecipitationData() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         Set<Precipitation> precipitations;
 
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     static class Precipitation {
 
         PrecipitationValue precipitationValue;
@@ -212,7 +244,7 @@ public class SetDeserializationTest {
     }
 
     @Test
-    void informUserThatASet_itsGenericType_shouldBeAnnotatedWithTag() {
+    void informUserThatFieldOfTypeSet_shouldHaveItemsFilledIn() {
         // given
         String data = """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -249,7 +281,7 @@ public class SetDeserializationTest {
 
         // then
         Assertions.assertThatThrownBy(when)
-                .hasMessage("Generics of type Set require @Tag pointing to mapped XML path (ForecastWithMissingTag)");
+                .hasMessage("Field (ForecastWithMissingTag) requires @Tag to have items parameter describing the tag name of a single repeated tag");
     }
 
     public static class WeatherDataWithMissingTag {
@@ -314,7 +346,7 @@ public class SetDeserializationTest {
         public WeatherDataRelativeMapping() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         Set<ForecastRelativeMapping> forecasts;
     }
 
@@ -373,7 +405,7 @@ public class SetDeserializationTest {
         public WeatherDataRelativeAndAbsoluteMapping() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         Set<ForecastRelativeAndAbsoluteMapping> forecasts;
     }
 
@@ -430,7 +462,7 @@ public class SetDeserializationTest {
         public Gpx() {
         }
 
-        @Tag(path = "/gpx")
+        @Tag(path = "/gpx", items = "wpt")
         Set<Wpt> wayPoints;
     }
 
@@ -445,5 +477,4 @@ public class SetDeserializationTest {
         @Tag(path = "time")
         String time;
     }
-
 }

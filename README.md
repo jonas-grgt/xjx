@@ -49,10 +49,10 @@ public class Location {
     private Location() {
     }
 
-    @Tag(path = "/WeatherData/Location/City")
+    @Tag(path = "City")
     private String City;
 
-    @Tag(path = "/WeatherData/Location/Country")
+    @Tag(path = "Country")
     private String Country;
 }
 ```
@@ -68,7 +68,7 @@ String document = """
       <CurrentConditions>
         <Temperature>
           <Value>75</Value>
-            <Unit>°F</Unit>
+            <Unit><![CDATA[°F]]></Unit>
         </Temperature>
         <Humidity>
           <Value>60</Value>
@@ -134,57 +134,42 @@ class Temperature {
 
 
 ### Collection types
-When deserializing XML data containing a collection type, the following conventions apply:
+When deserializing an XML document containing repeated elements, it can be mapped onto one of the collection types `List` or `Set`.
 
-- Only `List` and `Set` types are supported
-- The List or Set field should be annotated with `@Tag` having a `path` pointing to the containing tag that holds the repeated tags.
-- The nested complex type should be annotated top-level with `@Tag` having a `path` pointing to a single element that is repeated
-- Fields within the nested complex type can be annotated as usual.
+The following conventions should be followed:
+
+- Only `List` and `Set` types are supported for mapping repeated elements.
+- The `@Tag` annotation should be used on a `List` or `Set` field.
+    - Include a `path` attribute pointing to the containing tag that holds the repeated tags.
+    - Include an `items` attribute pointing to the repeated tag, relatively.
+    - The `path` attribute supports both relative and absolute paths.
+- The generic argument can be any standard simple type (e.g., `String`, `Boolean`, `Double`, `Long`, etc.) or a custom complex type.
+- Fields within the nested complex type can be annotated as usual, using relative or absolute paths.
+
+Example XML document:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <WeatherData>
-    <Forecasts>
-        <Day Date="2023-09-12">
-            <High>
-                <Value>71</Value>
-            </High>
-            <Low>
-                <Value>62</Value>
-            </Low>
-        </Day>
+  <Forecasts>
+    <Day Date="2023-09-12">
+      <High>
+        <Value>71</Value>
+      </High>
+      <Low>
+        <Value>62</Value>
+      </Low>
+      </Day>
         <Day Date="2023-09-13">
-            <High>
-                <Value>78</Value>
-            </High>
-            <Low>
-                <Value>71</Value>
-            </Low>
+          <High>
+            <Value>78</Value>
+          </High>
+          <Low>
+             <Value>71</Value>
+          </Low>
         </Day>
     </Forecasts>
 </WeatherData>
-```
-
-```java
-public class WeatherData {
-    // When mapping List or Set the type needs to point to the
-    // tag containing the repeated elements
-    @Tag(path = "/WeatherData/Forecasts")
-    List<Forecast> forecasts;
-}
-
-// Top level annoation is required and 
-// needs to point to an indiviual element that is repeated
-@Tag(path = "/WeatherData/Forecasts/Day")
-public class Forecast {
-    // field can be both absolutely as relatively mapped
-    @Tag(path = "High/Value")
-    String maxTemperature;
-
-    // field can be both absolutely as relatively mapped
-    @Tag(path = "/WeatherData/Forecasts/Day/Low/Value")
-    String minTemperature;
-}
 ```
 
 ### Map types
@@ -193,12 +178,12 @@ Maps can be deserialized either as a field or a top-level type. Consider the fol
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <WeatherData>
-    <CurrentConditions>
-        <Temperature>
-            <Value>75</Value>
-            <Unit>°F</Unit>
-        </Temperature>
-    </CurrentConditions>
+  <CurrentConditions>
+     <Temperature>
+        <Value>75</Value>
+          <Unit>°F</Unit>
+      </Temperature>
+  </CurrentConditions>
 </WeatherData>
 ```
 

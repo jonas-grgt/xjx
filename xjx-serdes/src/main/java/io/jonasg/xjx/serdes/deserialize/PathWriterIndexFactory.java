@@ -1,9 +1,10 @@
 package io.jonasg.xjx.serdes.deserialize;
 
+import io.jonasg.xjx.serdes.Path;
 import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.TypeMappers;
 import io.jonasg.xjx.serdes.deserialize.accessor.FieldAccessor;
 import io.jonasg.xjx.serdes.reflector.FieldReflector;
-import io.jonasg.xjx.serdes.reflector.Reflector;
 import io.jonasg.xjx.serdes.reflector.TypeReflector;
 
 import java.lang.reflect.Field;
@@ -42,7 +43,10 @@ public class PathWriterIndexFactory {
         return doBuildIndex(type, path, index, () -> root);
     }
 
-    private Map<Path, PathWriter> doBuildIndex(Class<?> type, Path path, Map<Path, PathWriter> index, Supplier<Object> root) {
+    private Map<Path, PathWriter> doBuildIndex(Class<?> type,
+                                               Path path,
+                                               Map<Path, PathWriter> index,
+                                               Supplier<Object> root) {
         TypeReflector.reflect(type).fields()
                 .forEach(field -> indexField(field, index, path, root));
         return index;
@@ -73,7 +77,10 @@ public class PathWriterIndexFactory {
         }
     }
 
-    private static void doIndexMapType(FieldReflector field, Map<Path, PathWriter> index, Supplier<Object> parent, Path pathForField) {
+    private static void doIndexMapType(FieldReflector field,
+                                       Map<Path, PathWriter> index,
+                                       Supplier<Object> parent,
+                                       Path pathForField) {
         index.put(pathForField, PathWriter.objectInitializer(() -> {
             Map<String, Object> map = new HashMap<>();
             Class<?> valueType = (Class<?>) ((ParameterizedType) field.genericType()).getActualTypeArguments()[1];
@@ -86,7 +93,10 @@ public class PathWriterIndexFactory {
         }));
     }
 
-    private static void indexMapAsRootType(FieldReflector field, Map<Path, PathWriter> index, Supplier<Object> parent, Path pathForField) {
+    private static void indexMapAsRootType(FieldReflector field,
+                                           Map<Path, PathWriter> index,
+                                           Supplier<Object> parent,
+                                           Path pathForField) {
         index.put(pathForField, PathWriter.rootInitializer(() -> {
             Map<String, Object> map = new HashMap<>();
             FieldAccessor.of(field, parent.get()).set(map);
@@ -94,7 +104,10 @@ public class PathWriterIndexFactory {
         }));
     }
 
-    private void indexComplexType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+    private void indexComplexType(FieldReflector field,
+                                  Map<Path, PathWriter> index,
+                                  Path path,
+                                  Supplier<Object> parent) {
         if (field.hasAnnotation(Tag.class)) {
             doIndexComplexType(field, index, path, parent);
         } else {
@@ -176,34 +189,49 @@ public class PathWriterIndexFactory {
     }
 
     private void indexSetType(FieldReflector field, Map<Path, PathWriter> index, Path parentPath, Supplier<Object> parent) {
+//        Collection<Object> set = new HashSet<>();
+//        Path path = getPathForField(field, parentPath);
+//        var pathWriter = PathWriter.objectInitializer(() -> {
+//            FieldAccessor.of(field, parent.get()).set(set);
+//            return set;
+//        });
+//        if (parentPath.isRoot()) {
+//            pathWriter.setRootInitializer(() -> {
+//                FieldAccessor.of(field, parent.get()).set(set);
+//                return parent.get();
+//            });
+//        }
+//        index.put(path, pathWriter);
+//        Type actualTypeArgument = ((ParameterizedType) field.genericType()).getActualTypeArguments()[0];
+//        Class<?> typeArgument = (Class<?>) actualTypeArgument;
+//        var tag = Reflector.reflect(typeArgument).annotation(Tag.class);
+//        if (tag != null) {
+//            Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(typeArgument);
+//            index.put(Path.parse(tag.path()), PathWriter.objectInitializer(() -> {
+//                collectionCacheType.clear();
+//                Object listTypeInstance = listTypeInstanceSupplier.get();
+//                set.add(listTypeInstance);
+//                return listTypeInstance;
+//            }));
+//            doBuildIndex(typeArgument, Path.parse(tag.path()), index, listTypeInstanceSupplier);
+//        } else {
+//            throw new XjxDeserializationException("Generics of type Set require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
+//        }
         Collection<Object> set = new HashSet<>();
         Path path = getPathForField(field, parentPath);
         var pathWriter = PathWriter.objectInitializer(() -> {
             FieldAccessor.of(field, parent.get()).set(set);
             return set;
         });
-        if (parentPath.isRoot()) {
+        if (path.isRoot()) {
             pathWriter.setRootInitializer(() -> {
                 FieldAccessor.of(field, parent.get()).set(set);
                 return parent.get();
             });
         }
         index.put(path, pathWriter);
-        Type actualTypeArgument = ((ParameterizedType) field.genericType()).getActualTypeArguments()[0];
-        Class<?> typeArgument = (Class<?>) actualTypeArgument;
-        var tag = Reflector.reflect(typeArgument).annotation(Tag.class);
-        if (tag != null) {
-            Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(typeArgument);
-            index.put(Path.parse(tag.path()), PathWriter.objectInitializer(() -> {
-                collectionCacheType.clear();
-                Object listTypeInstance = listTypeInstanceSupplier.get();
-                set.add(listTypeInstance);
-                return listTypeInstance;
-            }));
-            doBuildIndex(typeArgument, Path.parse(tag.path()), index, listTypeInstanceSupplier);
-        } else {
-            throw new XjxDeserializationException("Generics of type Set require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
-        }
+
+        indexListTypeArgument(path, field, index, set);
     }
 
     private Supplier<Object> collectionSupplierForType(Class<?> typeArgument) {
@@ -231,21 +259,43 @@ public class PathWriterIndexFactory {
             });
         }
         index.put(path, pathWriter);
+
+        indexListTypeArgument(path, field, index, list);
+    }
+
+    private void indexListTypeArgument(Path path, FieldReflector field, Map<Path, PathWriter> index, Collection<Object> list) {
         Type actualTypeArgument = ((ParameterizedType) field.genericType()).getActualTypeArguments()[0];
         Class<?> typeArgument = (Class<?>) actualTypeArgument;
-        var tag = Reflector.reflect(typeArgument).annotation(Tag.class);
-        if (tag != null) {
-            Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(typeArgument);
-            index.put(Path.parse(tag.path()), PathWriter.objectInitializer(() -> {
-                collectionCacheType.clear();
-                Object listTypeInstance = listTypeInstanceSupplier.get();
-                list.add(listTypeInstance);
-                return listTypeInstance;
-            }));
-            doBuildIndex(typeArgument, Path.parse(tag.path()), index, listTypeInstanceSupplier);
+        if (TypeMappers.TYPES.contains(typeArgument)) {
+            indexSimpleTypeListTypeArgument(path, index, list, field, typeArgument);
         } else {
-            throw new XjxDeserializationException("Generics of type List require @Tag pointing to mapped XML path (" + typeArgument.getSimpleName() + ")");
+            indexComplexListTypeArgument(index, list, typeArgument, field);
         }
+    }
+
+    private static void indexSimpleTypeListTypeArgument(Path path, Map<Path, PathWriter> index, Collection<Object> list, FieldReflector field, Class<?> typeArgument) {
+        Tag tag = field.getAnnotation(Tag.class);
+        index.put(path.append(Path.parse(tag.items())),
+                PathWriter.valueInitializer((o) -> list.add(TypeMappers.forType(typeArgument).apply(o))));
+    }
+
+    private void indexComplexListTypeArgument(Map<Path, PathWriter> index, Collection<Object> list, Class<?> typeArgument, FieldReflector field) {
+        Supplier<Object> listTypeInstanceSupplier = collectionSupplierForType(typeArgument);
+        Tag tag = field.getAnnotation(Tag.class);
+        if (tag.items().isBlank()) {
+            throw new XjxDeserializationException(
+                  """
+                  Field (%s) requires @Tag to have items parameter describing\
+                   the tag name of a single repeated tag""".formatted(typeArgument.getSimpleName(), field.name()));
+        }
+        Path path = Path.parse(tag.path()).append(Path.parse(tag.items()));
+        index.put(path, PathWriter.objectInitializer(() -> {
+            collectionCacheType.clear();
+            Object listTypeInstance = listTypeInstanceSupplier.get();
+            list.add(listTypeInstance);
+            return listTypeInstance;
+        }));
+        doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
     }
 
     private Path getPathForField(FieldReflector field, Path path) {

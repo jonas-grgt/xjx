@@ -1,9 +1,10 @@
-package io.jonasg.xjx.serdes;
+package io.jonasg.xjx.serdes.seraialize;
 
-import io.jonasg.xjx.serdes.deserialize.Path;
+import io.jonasg.xjx.serdes.Section;
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.Path;
 import io.jonasg.xjx.serdes.reflector.InstanceField;
 import io.jonasg.xjx.serdes.reflector.Reflector;
-import io.jonasg.xjx.serdes.seraialize.XmlNode;
 
 public class XmlNodeStructureFactory {
 

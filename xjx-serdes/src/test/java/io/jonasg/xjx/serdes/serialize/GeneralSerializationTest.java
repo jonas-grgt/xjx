@@ -1,4 +1,4 @@
-package io.jonasg.xjx.serdes.seraialize;
+package io.jonasg.xjx.serdes.serialize;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;

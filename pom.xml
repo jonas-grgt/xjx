@@ -4,7 +4,7 @@
 
     <groupId>io.jonasg</groupId>
     <artifactId>xjx</artifactId>
-    <version>0.2.0</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>xjx-sax</module>
@@ -194,18 +194,6 @@
                             </jreleaser>
                         </configuration>
                     </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>publication</id>
-            <properties>
-                <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
-            </properties>
-            <build>
-                <defaultGoal>deploy</defaultGoal>
-                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>

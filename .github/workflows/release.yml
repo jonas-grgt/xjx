@@ -1,59 +1,56 @@
-name: release
+name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: tag
+
+env:
+  INPUT_VERSION: '0.2.0'
 
 jobs:
-  release:
-    name: Release
+  bump_version:
+    name: "Bump Version"
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # Configure build steps as you'd normally do
-
-      - name: Setup Java
+      - uses: actions/checkout@v3
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: 21
-          distribution: 'zulu'
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-
-      # Post JARs to Maven Central
-
-      - name: Release to Maven Central
-        env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          export GPG_TTY=$(tty)
-          git config user.name "JonasG"
-          git config user.email "jonas.grgt@gmail.com"
-          mvn -B --file pom.xml release:prepare release:perform
-
-      # Create a release
-
-      - name: Run JReleaser
-        uses: jreleaser/release-action@v2
-        env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Persist logs
-
-      - name: JReleaser release output
-        if: always()
-        uses: actions/upload-artifact@v3
+          java-version: '17'
+          distribution: 'adopt'
+      - name: Bump version
+        id: bump
+        run: "./mvnw versions:set -DnewVersion=${{ github.event.inputs.tag }} -DprocessAllModules && ./mvnw versions:commit -DprocessAllModules"
+      - name: Commit bumped version
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          name: jreleaser-release
-          path: |
-            out/jreleaser/trace.log
-            out/jreleaser/output.properties
+          commit_message: "Bump version to ${{ github.event.inputs.tag }}"
+  publish:
+    needs: [bump_version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for version bump
+        run: sleep 5
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+      - name: Tag Release
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "v${{ github.event.inputs.tag }}"
+      - name: Release
+        env:
+          JRELEASER_NEXUS2_USERNAME: ${{ secrets.JRELEASER_NEXUS2_USERNAME }}
+          JRELEASER_NEXUS2_PASSWORD: ${{ secrets.JRELEASER_NEXUS2_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./mvnw -Prelease deploy jreleaser:full-release -DaltDeploymentRepository=local::file:./target/staging-deploy --non-recursive

@@ -2,15 +2,160 @@ package io.jonasg.xjx.serdes.deserialize;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ListDeserializationTest {
+
+    @Test
+    void deserializeIntoListField_OfStringType() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <Strings>
+                        <String>2023-09-12</String>
+                        <String>2023-09-13</String>
+                        <String>2023-09-14</String>
+                        <String>2023-09-15</String>
+                    </Strings>
+                </Data>
+                """;
+
+        // when
+        var dataHolder = new XjxSerdes().read(data, ListOfStrings.class);
+
+        // then
+        assertThat(dataHolder.strings).containsExactlyInAnyOrder(
+                "2023-09-12",
+                "2023-09-13",
+                "2023-09-14",
+                "2023-09-15"
+        );
+    }
+
+    static class ListOfStrings {
+        @Tag(path = "/Data/Strings", items = "String")
+        List<String> strings;
+    }
+
+    @Test
+    void deserializeIntoListField_OfBooleanType() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <Booleans>
+                        <Boolean>True</Boolean>
+                        <Boolean>true</Boolean>
+                        <Boolean>yes</Boolean>
+                        <Boolean>YeS</Boolean>
+                        <Boolean>1</Boolean>
+                    </Booleans>
+                </Data>
+                """;
+
+        // when
+        var weatherData = new XjxSerdes().read(data, ListOfBooleans.class);
+
+        // then
+        assertThat(weatherData.booleans).containsOnly(Boolean.TRUE);
+    }
+
+    static class ListOfBooleans {
+        @Tag(path = "/Data/Booleans", items = "Boolean")
+        List<Boolean> booleans;
+    }
+
+
+    @Test
+    void deserializeIntoListField_OfLongType() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <Longs>
+                        <Long>123456789</Long>
+                        <Long>-987654321</Long>
+                        <Long>0</Long>
+                    </Longs>
+                </Data>
+                """;
+
+        // when
+        var listOfLongs = new XjxSerdes().read(data, ListOfLongs.class);
+
+        // then
+        assertThat(listOfLongs.longs).containsExactly(123456789L, -987654321L, 0L);
+    }
+
+    static class ListOfLongs {
+        @Tag(path = "/Data/Longs", items = "Long")
+        List<Long> longs;
+    }
+
+    @Test
+    void deserializeIntoListField_OfDoubleType() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <Doubles>
+                        <Double>3.14</Double>
+                        <Double>-2.5</Double>
+                        <Double>0.0</Double>
+                    </Doubles>
+                </Data>
+                """;
+
+        // when
+        var listOfDoubles = new XjxSerdes().read(data, ListOfDoubles.class);
+
+        // then
+        assertThat(listOfDoubles.doubles).containsExactly(3.14, -2.5, 0.0);
+    }
+
+    static class ListOfDoubles {
+        @Tag(path = "/Data/Doubles", items = "Double")
+        List<Double> doubles;
+    }
+
+
+    @Test
+    void deserializeIntoListField_OfLocalDate() {
+        // given
+        String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Data>
+                    <LocalDates>
+                        <LocalDate>2024-01-01</LocalDate>
+                        <LocalDate>2024-02-01</LocalDate>
+                        <LocalDate>2024-03-01</LocalDate>
+                    </LocalDates>
+                </Data>
+                """;
+
+        // when
+        var listOfDates = new XjxSerdes().read(data, ListOfDates.class);
+
+        // then
+        assertThat(listOfDates.dates).containsExactly(
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 2, 1),
+                LocalDate.of(2024, 3, 1)
+        );
+    }
+
+    static class ListOfDates {
+        @Tag(path = "/Data/LocalDates", items = "LocalDate")
+        List<LocalDate> dates;
+    }
 
     @Test
     void deserializeIntoListField_OfComplexType_ContainingTopLevelMapping() {
@@ -58,11 +203,10 @@ public class ListDeserializationTest {
         public WeatherData() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         List<Forecast> forecasts;
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     public static class Forecast {
         public Forecast() {
         }
@@ -75,42 +219,42 @@ public class ListDeserializationTest {
     void deserializeIntoListField_OfComplexType_ContainingComplexTypesWithCustomMapping() {
         // given
         String data = """
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <WeatherData>
-                        <Forecasts>
-                            <Day Date="2023-09-12">
-                                <High>
-                                    <Value>71</Value>
-                                    <Unit>°F</Unit>
-                                </High>
-                                <Low>
-                                    <Value>60</Value>
-                                    <Unit>°F</Unit>
-                                </Low>
-                                <Precipitation>
-                                    <Value>10</Value>
-                                    <Unit>%</Unit>
-                                </Precipitation>
-                                <WeatherCondition>Partly Cloudy</WeatherCondition>
-                            </Day>
-                            <Day Date="2023-09-13">
-                                <High>
-                                    <Value>78</Value>
-                                    <Unit>°F</Unit>
-                                </High>
-                                <Low>
-                                    <Value>62</Value>
-                                    <Unit>°F</Unit>
-                                </Low>
-                                <Precipitation>
-                                    <Value>12</Value>
-                                    <Unit>%</Unit>
-                                </Precipitation>
-                                <WeatherCondition>Partly Cloudy</WeatherCondition>
-                            </Day>
-                        </Forecast>
-                    </WeatherData>
-                    """;
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Forecasts>
+                        <Day Date="2023-09-12">
+                            <High>
+                                <Value>71</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>60</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <Precipitation>
+                                <Value>10</Value>
+                                <Unit>%</Unit>
+                            </Precipitation>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                        <Day Date="2023-09-13">
+                            <High>
+                                <Value>78</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>62</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <Precipitation>
+                                <Value>12</Value>
+                                <Unit>%</Unit>
+                            </Precipitation>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                    </Forecast>
+                </WeatherData>
+                """;
 
         // when
         PrecipitationData precipitationData = new XjxSerdes().read(data, PrecipitationData.class);
@@ -125,34 +269,34 @@ public class ListDeserializationTest {
     void deserializeIntoListField_EvenIfNoneOfTheInnerMappedFieldsOfComplexTypeCanBeMapped() {
         // given
         String data = """
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <WeatherData>
-                        <Forecasts>
-                            <Day Date="2023-09-12">
-                                <High>
-                                    <Value>71</Value>
-                                    <Unit>°F</Unit>
-                                </High>
-                                <Low>
-                                    <Value>60</Value>
-                                    <Unit>°F</Unit>
-                                </Low>
-                                <WeatherCondition>Partly Cloudy</WeatherCondition>
-                            </Day>
-                            <Day Date="2023-09-13">
-                                <High>
-                                    <Value>78</Value>
-                                    <Unit>°F</Unit>
-                                </High>
-                                <Low>
-                                    <Value>62</Value>
-                                    <Unit>°F</Unit>
-                                </Low>
-                                <WeatherCondition>Partly Cloudy</WeatherCondition>
-                            </Day>
-                        </Forecast>
-                    </WeatherData>
-                    """;
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Forecasts>
+                        <Day Date="2023-09-12">
+                            <High>
+                                <Value>71</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>60</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                        <Day Date="2023-09-13">
+                            <High>
+                                <Value>78</Value>
+                                <Unit>°F</Unit>
+                            </High>
+                            <Low>
+                                <Value>62</Value>
+                                <Unit>°F</Unit>
+                            </Low>
+                            <WeatherCondition>Partly Cloudy</WeatherCondition>
+                        </Day>
+                    </Forecast>
+                </WeatherData>
+                """;
 
         // when
         PrecipitationData precipitationData = new XjxSerdes().read(data, PrecipitationData.class);
@@ -165,11 +309,11 @@ public class ListDeserializationTest {
     void listsMappedOntoSelfClosingTag_containsEmptyList() {
         // given
         String data = """
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <WeatherData>
-                        <Forecasts/>
-                    </WeatherData>
-                    """;
+                <?xml version="1.0" encoding="UTF-8"?>
+                <WeatherData>
+                    <Forecasts/>
+                </WeatherData>
+                """;
 
         // when
         PrecipitationData precipitationData = new XjxSerdes().read(data, PrecipitationData.class);
@@ -183,12 +327,11 @@ public class ListDeserializationTest {
         public PrecipitationData() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         List<Precipitation> precipitations;
 
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     static class Precipitation {
 
         public Precipitation() {
@@ -208,7 +351,7 @@ public class ListDeserializationTest {
     }
 
     @Test
-    void informUserThatAList_itsGenericType_shouldBeAnnotatedWithTag() {
+    void informUserThatAMappedListField_shouldHaveAFilledInItemsParameter() {
         // given
         String data = """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -245,9 +388,10 @@ public class ListDeserializationTest {
 
         // then
         assertThatThrownBy(when)
-                .hasMessage("Generics of type List require @Tag pointing to mapped XML path (ForecastWithMissingTag)");
+                .hasMessage("Field (ForecastWithMissingTag) requires @Tag to have items parameter describing the tag name of a single repeated tag");
     }
 
+    @SuppressWarnings("unused")
     public static class WeatherDataWithMissingTag {
         public WeatherDataWithMissingTag() {
         }
@@ -256,6 +400,7 @@ public class ListDeserializationTest {
         List<ForecastWithMissingTag> forecasts;
     }
 
+    @SuppressWarnings("unused")
     public static class ForecastWithMissingTag {
         public ForecastWithMissingTag() {
         }
@@ -310,11 +455,10 @@ public class ListDeserializationTest {
         public WeatherDataRelativeMapping() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         List<ForecastRelativeMapping> forecasts;
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     public static class ForecastRelativeMapping {
         public ForecastRelativeMapping() {
         }
@@ -371,11 +515,10 @@ public class ListDeserializationTest {
         public WeatherDataRelativeAndAbsoluteMapping() {
         }
 
-        @Tag(path = "/WeatherData/Forecasts")
+        @Tag(path = "/WeatherData/Forecasts", items = "Day")
         List<ForecastRelativeAndAbsoluteMapping> forecasts;
     }
 
-    @Tag(path = "/WeatherData/Forecasts/Day")
     public static class ForecastRelativeAndAbsoluteMapping {
         public ForecastRelativeAndAbsoluteMapping() {
         }
@@ -430,11 +573,10 @@ public class ListDeserializationTest {
         public Gpx() {
         }
 
-        @Tag(path = "/gpx")
+        @Tag(path = "/gpx", items = "wpt")
         List<Wpt> wayPoints;
     }
 
-    @Tag(path = "/gpx/wpt")
     static class Wpt {
         public Wpt() {
         }

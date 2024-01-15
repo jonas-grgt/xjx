@@ -6,6 +6,8 @@ import io.jonasg.xjx.serdes.deserialize.MapRootSaxHandler;
 import io.jonasg.xjx.serdes.deserialize.PathBasedSaxHandler;
 import io.jonasg.xjx.serdes.deserialize.PathWriterIndexFactory;
 import io.jonasg.xjx.serdes.deserialize.XjxDeserializationException;
+import io.jonasg.xjx.serdes.seraialize.XmlNodeStructureFactory;
+import io.jonasg.xjx.serdes.seraialize.XmlStringBuilder;
 
 import java.io.Reader;
 import java.io.StringReader;

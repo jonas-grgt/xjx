@@ -1,6 +1,4 @@
-package io.jonasg.xjx.serdes.deserialize;
-
-import io.jonasg.xjx.serdes.Section;
+package io.jonasg.xjx.serdes;
 
 import java.util.Arrays;
 import java.util.Iterator;

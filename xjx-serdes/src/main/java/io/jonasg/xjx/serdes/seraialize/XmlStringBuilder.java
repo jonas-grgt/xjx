@@ -1,4 +1,4 @@
-package io.jonasg.xjx.serdes;
+package io.jonasg.xjx.serdes.seraialize;
 
 import io.jonasg.xjx.serdes.seraialize.XmlNode;
 
