@@ -38,11 +38,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Tag Release
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v${{ github.event.inputs.tag }}"
+      - name: Stage Release
+        run: ./mvnw -Prelease deploy -DaltDeploymentRepository=local::file:./target/staging-deploy
       - name: Release
         env:
           JRELEASER_NEXUS2_USERNAME: ${{ secrets.JRELEASER_NEXUS2_USERNAME }}
@@ -51,4 +48,4 @@ jobs:
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./mvnw -Prelease deploy jreleaser:full-release -DaltDeploymentRepository=local::file:./target/staging-deploy --non-recursive
+        run: ./mvnw -Prelease jreleaser:full-release --non-recursive
