@@ -7,9 +7,6 @@ on:
         type: string
         description: tag
 
-env:
-  INPUT_VERSION: '0.2.0'
-
 jobs:
   bump_version:
     name: "Bump Version"
@@ -32,9 +29,10 @@ jobs:
     needs: [bump_version]
     runs-on: ubuntu-latest
     steps:
-      - name: wait for version bump
-        run: sleep 5
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: main
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
