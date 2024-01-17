@@ -17,12 +17,16 @@ class StartTagScanner implements Scanner {
             throw new XmlParsingException("Start tag missing < in: '" + character + reader.currentLine() + "'");
         }
         var startTagName = tokenizeTag(reader);
+        var tagType = startTagName.type;
+        var tagName = startTagName.name;
         var currentChar = reader.getCurrentChar();
         Attributes attributes = Attributes.empty();
         if (currentChar != null && currentChar != Character.valueOf('>')) {
-            attributes = tokenizeAttributes(reader);
+            var tokenizeAttributes = tokenizeAttributes(reader);
+            attributes = tokenizeAttributes.attributes;
+            tagType = tokenizeAttributes.tagType == null ? tagType : tokenizeAttributes.tagType;
         }
-        emitter.emit(new Token<>(startTagName.type, startTag(startTagName.name, attributes)));
+        emitter.emit(new Token<>(tagType, startTag(tagName, attributes)));
         return Scanner.nextScanner(reader);
     }
 
@@ -59,10 +63,11 @@ class StartTagScanner implements Scanner {
         return new StartTagName(tagNameBuilder.toString(), tokenType);
     }
 
-    private Attributes tokenizeAttributes(PositionedReader reader) {
+    private TokenizedAttributes tokenizeAttributes(PositionedReader reader) {
         var attributes = new Attributes();
         var attributeNameBuilder = new StringBuilder();
         char character;
+        Token.Type tagType = null;
         while (reader.hasMoreToRead()) {
             character = reader.readOneChar();
             if (character == '>') {
@@ -73,13 +78,15 @@ class StartTagScanner implements Scanner {
                 attributeNameBuilder.setLength(0);
                 String attributeValue = readAttributeValue(reader);
                 attributes.add(attributeName, attributeValue);
+            } else if (character == '/') {
+                tagType = Token.Type.SELF_CLOSING_TAG;
             } else {
                 if (!Character.isWhitespace(character)) {
                     attributeNameBuilder.append(character);
                 }
             }
         }
-        return attributes;
+        return new TokenizedAttributes(tagType, attributes);
     }
 
     private String readAttributeValue(PositionedReader reader) {
@@ -98,6 +105,10 @@ class StartTagScanner implements Scanner {
     }
 
     private record StartTagName(String name, Token.Type type) {
+
+    }
+
+    private record TokenizedAttributes(Token.Type tagType, Attributes attributes) {
 
     }
 }

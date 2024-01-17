@@ -177,6 +177,6 @@ class StartTagScannerTest {
 
         // then
         Assertions.assertThat(tokens)
-                .containsExactly(new Token<>(Token.Type.START_TAG, new StartTag("a", new Attributes("href", "home", "target", "_blank"))));
+                .containsExactly(new Token<>(Token.Type.SELF_CLOSING_TAG, new StartTag("a", new Attributes("href", "home", "target", "_blank"))));
     }
 }
