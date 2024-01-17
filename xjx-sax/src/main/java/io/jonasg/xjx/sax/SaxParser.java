@@ -28,9 +28,10 @@ public class SaxParser {
             var attributes = getAttributes(startTag);
             saxHandler.startTag(startTag.namespace(), startTag.name(), attributes);
         } else if (token.type().equals(Token.Type.SELF_CLOSING_TAG)) {
-            var startTagValue = (StartTag)token.value();
-            var attributes = getAttributes(startTagValue);
-            saxHandler.startTag(startTagValue.namespace(), startTagValue.name(), attributes);
+            var startTag = (StartTag)token.value();
+            var attributes = getAttributes(startTag);
+            saxHandler.startTag(startTag.namespace(), startTag.name(), attributes);
+            saxHandler.endTag(startTag.namespace(), startTag.name());
         } else if (token.type().equals(Token.Type.END_TAG)) {
             var endTag = (EndTag)token.value();
             saxHandler.endTag(endTag.namespace(), endTag.name());

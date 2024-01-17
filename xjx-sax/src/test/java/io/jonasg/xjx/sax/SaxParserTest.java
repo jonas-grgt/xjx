@@ -195,8 +195,8 @@ class SaxParserTest {
 
             // then
             Assertions.assertThat(actualEndTags)
-                    .hasSize(1)
-                    .contains(new ActualEndTag("animals"));
+                    .hasSize(2)
+                    .contains(new ActualEndTag("animals"), new ActualEndTag("dog"));
         }
 
         @Test
@@ -221,8 +221,32 @@ class SaxParserTest {
 
             // then
             Assertions.assertThat(actualEndTags)
+                    .hasSize(2)
+                    .contains(new ActualEndTag("a", "animals"), new ActualEndTag("dog"));
+        }
+
+        @Test
+        void onSelfClosingTag() {
+            // given
+            var parser = new SaxParser();
+            var xmlDocument = new BufferedReader(new StringReader("""
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <dog/>
+                    """));
+
+            // when
+            var actualEndTags = new ArrayList<>();
+            parser.parse(xmlDocument, new TestSaxHandler() {
+                @Override
+                public void endTag(String namespace, String name) {
+                    actualEndTags.add(new ActualEndTag(namespace, name));
+                }
+            });
+
+            // then
+            Assertions.assertThat(actualEndTags)
                     .hasSize(1)
-                    .contains(new ActualEndTag("a", "animals"));
+                    .contains(new ActualEndTag("dog"));
         }
     }
 
@@ -250,7 +274,7 @@ class SaxParserTest {
 
             // then
             Assertions.assertThat(actualEndTags)
-                    .hasSize(1)
+                    .hasSize(2)
                     .contains(new ActualEndTag("animals"));
         }
     }
