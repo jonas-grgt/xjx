@@ -24,8 +24,9 @@ jobs:
       - name: Commit bumped version
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Bump version to ${{ github.event.inputs.tag }}"
+          commit_message: "Prepare release version ${{ github.event.inputs.tag }}"
   publish:
+    name: "Publish"
     needs: [bump_version]
     runs-on: ubuntu-latest
     steps:
