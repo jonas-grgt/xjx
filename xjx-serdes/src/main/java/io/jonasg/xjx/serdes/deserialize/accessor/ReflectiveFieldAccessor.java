@@ -1,8 +1,8 @@
 package io.jonasg.xjx.serdes.deserialize.accessor;
 
-import io.jonasg.xjx.serdes.reflector.FieldReflector;
-
 import java.util.function.Function;
+
+import io.jonasg.xjx.serdes.reflector.FieldReflector;
 
 public class ReflectiveFieldAccessor implements FieldAccessor {
 

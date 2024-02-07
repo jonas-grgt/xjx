@@ -1,6 +1,4 @@
-package io.jonasg.xjx.serdes.seraialize;
-
-import io.jonasg.xjx.serdes.seraialize.XmlNode;
+package io.jonasg.xjx.serdes.serialize;
 
 import java.util.List;
 

@@ -1,12 +1,13 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
 public class GeneralDeserializationTest {
 

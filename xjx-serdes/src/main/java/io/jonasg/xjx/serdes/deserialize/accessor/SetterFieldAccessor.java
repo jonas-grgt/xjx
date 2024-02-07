@@ -1,10 +1,10 @@
 package io.jonasg.xjx.serdes.deserialize.accessor;
 
-import io.jonasg.xjx.serdes.reflector.FieldReflector;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+
+import io.jonasg.xjx.serdes.reflector.FieldReflector;
 
 public class SetterFieldAccessor implements FieldAccessor {
 

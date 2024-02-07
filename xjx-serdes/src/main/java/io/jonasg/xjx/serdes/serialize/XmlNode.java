@@ -1,10 +1,10 @@
-package io.jonasg.xjx.serdes.seraialize;
-
-import io.jonasg.xjx.Attributes;
+package io.jonasg.xjx.serdes.serialize;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.jonasg.xjx.Attributes;
 
 public final class XmlNode {
     private final String name;

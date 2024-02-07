@@ -1,13 +1,13 @@
 package io.jonasg.xjx.serdes.serialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class EnumSerializationTest {
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
+public class EnumSerializationTest {
 
     @Test
     void mapToFieldOfTypeEnum_whenCharacterDataMatchesEnumConstantName() {

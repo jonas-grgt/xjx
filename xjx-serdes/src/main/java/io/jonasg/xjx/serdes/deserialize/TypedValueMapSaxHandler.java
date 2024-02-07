@@ -1,12 +1,12 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.sax.Attribute;
-import io.jonasg.xjx.sax.SaxHandler;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import io.jonasg.xjx.sax.Attribute;
+import io.jonasg.xjx.sax.SaxHandler;
 
 public class TypedValueMapSaxHandler implements SaxHandler {
 

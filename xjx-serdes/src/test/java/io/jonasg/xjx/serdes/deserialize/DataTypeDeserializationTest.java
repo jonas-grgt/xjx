@@ -1,11 +1,7 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
-import org.assertj.core.api.ThrowableAssert;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,8 +11,13 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
 public class DataTypeDeserializationTest {
 

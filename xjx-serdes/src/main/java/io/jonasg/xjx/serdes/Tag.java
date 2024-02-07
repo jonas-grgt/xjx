@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.RECORD_COMPONENT})
 public @interface Tag {
     /**
      * Specifies the Path expression indicating the location of the XML data for serialization and deserialization.

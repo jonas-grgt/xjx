@@ -1,15 +1,16 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
-import org.assertj.core.api.ThrowableAssert;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Test;
+
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
 public class ListDeserializationTest {
 

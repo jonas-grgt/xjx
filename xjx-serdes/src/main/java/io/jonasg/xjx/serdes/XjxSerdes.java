@@ -1,18 +1,18 @@
 package io.jonasg.xjx.serdes;
 
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.jonasg.xjx.sax.SaxParser;
 import io.jonasg.xjx.serdes.deserialize.MapOf;
 import io.jonasg.xjx.serdes.deserialize.MapRootSaxHandler;
 import io.jonasg.xjx.serdes.deserialize.PathBasedSaxHandler;
 import io.jonasg.xjx.serdes.deserialize.PathWriterIndexFactory;
 import io.jonasg.xjx.serdes.deserialize.XjxDeserializationException;
-import io.jonasg.xjx.serdes.seraialize.XmlNodeStructureFactory;
-import io.jonasg.xjx.serdes.seraialize.XmlStringBuilder;
-
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
+import io.jonasg.xjx.serdes.serialize.XmlNodeStructureFactory;
+import io.jonasg.xjx.serdes.serialize.XmlStringBuilder;
 
 /**
  * XjxSerdes provides functionality for serializing and deserializing objects to and from XML.

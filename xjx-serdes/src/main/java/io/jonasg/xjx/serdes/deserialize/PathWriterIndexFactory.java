@@ -1,12 +1,5 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.serdes.Path;
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.TypeMappers;
-import io.jonasg.xjx.serdes.deserialize.accessor.FieldAccessor;
-import io.jonasg.xjx.serdes.reflector.FieldReflector;
-import io.jonasg.xjx.serdes.reflector.TypeReflector;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -24,9 +17,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import io.jonasg.xjx.serdes.Path;
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.TypeMappers;
+import io.jonasg.xjx.serdes.deserialize.accessor.FieldAccessor;
+import io.jonasg.xjx.serdes.reflector.FieldReflector;
+import io.jonasg.xjx.serdes.reflector.TypeReflector;
+
 public class PathWriterIndexFactory {
 
-    private static final List<Class<?>> BASIC_TYPES = List.of(
+    public static final List<Class<?>> BASIC_TYPES = List.of(
             String.class, Integer.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
             double.class, char.class, Character.class, LocalDate.class, LocalDateTime.class, ZonedDateTime.class);
     private final Map<Class<?>, Object> collectionCacheType = new HashMap<>();

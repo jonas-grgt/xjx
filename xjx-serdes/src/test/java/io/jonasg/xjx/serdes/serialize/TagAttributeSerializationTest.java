@@ -1,11 +1,12 @@
 package io.jonasg.xjx.serdes.serialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
+import java.math.BigDecimal;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
 public class TagAttributeSerializationTest {
 

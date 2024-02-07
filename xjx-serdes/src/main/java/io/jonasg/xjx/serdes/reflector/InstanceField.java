@@ -35,6 +35,10 @@ public class InstanceField {
         return fieldReflector.type();
     }
 
+	public InstanceReflector<Object> reflect() {
+		return new InstanceReflector<>(getValue());
+	}
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceField.class.getSimpleName() + "[", "]")

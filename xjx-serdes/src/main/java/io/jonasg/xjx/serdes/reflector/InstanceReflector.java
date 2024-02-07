@@ -54,13 +54,17 @@ public class InstanceReflector<T> {
                 .ifPresent(f -> f.set(instance, value));
     }
 
-    public List<InstanceField> fields(Predicate<InstanceField> predicate) {
-        return typeReflector.fields()
-                .stream()
-                .map(f -> new InstanceField(f, instance))
-                .filter(predicate)
-                .toList();
-    }
+	public List<InstanceField> fields(Predicate<InstanceField> predicate) {
+		return typeReflector.fields()
+				.stream()
+				.map(f -> new InstanceField(f, instance))
+				.filter(predicate)
+				.toList();
+	}
+
+	public List<InstanceField> fields() {
+		return fields(f -> true);
+	}
 
     public T instance() {
         return instance;

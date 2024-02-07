@@ -1,9 +1,10 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import io.jonasg.xjx.serdes.Tag;
-import io.jonasg.xjx.serdes.XjxSerdes;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.XjxSerdes;
 
 public class DeserializationInstanceCreationTest {
 
