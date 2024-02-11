@@ -216,4 +216,27 @@ public class GeneralDeserializationTest {
         @Tag(path = "   /DataTypes/Double   ")
         Double Double;
     }
+
+	@Test
+	void absoluteRootMappingWithTopLevelMappedRootType() {
+		// given
+		String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<DataTypes>
+					<Double>5.7</Double>
+				</DataTypes>
+				""";
+
+		// when
+		var holder = new XjxSerdes().read(data, AbsoluteRootMappingHolder.class);
+
+		// then
+		assertThat(holder.Double).isEqualTo(5.7D);
+	}
+
+	@Tag(path = "/DataTypes")
+	static class AbsoluteRootMappingHolder {
+		@Tag(path = "/DataTypes/Double")
+		Double Double;
+	}
 }

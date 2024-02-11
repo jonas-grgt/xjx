@@ -94,10 +94,12 @@ Each `@Tag` annotation must include a `path` property, using an XPath-like expre
 
 Path expressions can be **absolute**, starting with a slash, representing a path from the root tag to the mapped tag.
 **Relative** paths, without a starting slash, require a parent to be mapped absolutely.
+Root mappings can be placed top-level on the class, all subsequent relative mappings are relative to the root mapping. 
 
 ```java
 import java.math.BigDecimal;
 
+@Tag(path = "/WeatherData")
 class Weather {
     // not annotated with @Tag hence is ignored
     String id;
@@ -105,6 +107,10 @@ class Weather {
     // example for an absolute mapped tag
     @Tag(path = "/WeatherData/Location") 
     Location location;
+	
+	// example for a relative-mapped tag based upon the top-level mapping
+	@Tag(path = "CurrentConditions")
+	Conditions conditions;
 
     // normally all fields without @Tag are ignored, yet this field is 
     // taken into account because at least one of its child fields is
@@ -128,6 +134,16 @@ class Temperature {
     @Tag(path = "/WeatherData/CurrenConditions/Temperature")
     BigDecimal max;
 }
+```
+
+Absolute mapping a field of top-level class containing a top-level root mapping is supported.
+```java
+@Tag(path = "/WeatherData")
+class Weather {
+    @Tag(path = "/WeatherData/Location")
+    Location location;
+}
+
 ```
 
 ### Attributes
