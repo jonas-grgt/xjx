@@ -1,6 +1,5 @@
 package io.jonasg.xjx.serdes.deserialize;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,24 +9,18 @@ import io.jonasg.xjx.sax.SaxHandler;
 
 public class TypedValueMapSaxHandler implements SaxHandler {
 
-    private final LinkedList<Map<String, Object>> mapsStack;
+	private final Class<?> valueType;
 
-    private final Class<?> valueType;
+	private final Map<String, Object> instance;
+
     private PathBasedSaxHandler<Object> objectPathBasedSaxHandler;
-
-
-    private Map<String, Object> instance;
 
     private String activeKey;
 
-    private String rootTag;
-
-    public TypedValueMapSaxHandler(MapWithTypeInfo instance) {
-        this.mapsStack = new LinkedList<>();
-        this.instance = instance.map();
+	public TypedValueMapSaxHandler(MapWithTypeInfo instance) {
+		this.instance = instance.map();
         this.valueType = instance.valueType();
     }
-
 
     @Override
     public void startDocument() {
