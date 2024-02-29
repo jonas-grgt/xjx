@@ -27,6 +27,11 @@ public class PathWriter {
         this.rootInitializer = rootInitializer;
     }
 
+	public PathWriter setValueInitializer(Consumer<Object> valueInitializer) {
+		this.valueInitializer = valueInitializer;
+		return this;
+	}
+
     public static PathWriter valueInitializer(Consumer<Object> o) {
         PathWriter pathWriter = new PathWriter();
         pathWriter.valueInitializer = o;

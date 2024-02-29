@@ -38,9 +38,15 @@ public class PathWriterIndexFactory {
 
     private <T> Map<Path, PathWriter> buildIndex(Class<T> type, Path path) {
         Map<Path, PathWriter> index = new HashMap<>();
-        T root = TypeReflector.reflect(type).instanceReflector().instance();
-        index.put(path, PathWriter.rootInitializer(() -> root));
-        return doBuildIndex(type, path, index, () -> root);
+		if (type.isRecord()) {
+			RecordWrapper<T> recordWrapper = new RecordWrapper<>(type);
+			index.put(path, PathWriter.rootInitializer(() -> recordWrapper));
+			return doBuildIndex(type, path, index, () -> recordWrapper);
+		} else {
+			T root = TypeReflector.reflect(type).instanceReflector().instance();
+			index.put(path, PathWriter.rootInitializer(() -> root));
+			return doBuildIndex(type, path, index, () -> root);
+		}
     }
 
     private Map<Path, PathWriter> doBuildIndex(Class<?> type,
@@ -62,13 +68,27 @@ public class PathWriterIndexFactory {
         } else if (Map.class.equals(field.type())) {
             indexMapType(field, index, path, parent);
         } else if (field.type().isEnum()) {
-            indexEnumType(field, index, path, parent);
+			indexEnumType(field, index, path, parent);
+		} else if (field.isRecord()) {
+			indexRecordType(field, index, path, parent);
         } else {
             indexComplexType(field, index, path, parent);
         }
     }
 
-    private void indexMapType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+	private void indexRecordType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
+		RecordWrapper<?> recordWrapper = new RecordWrapper<>(field.type());
+		index.put(getPathForField(field, path), PathWriter.objectInitializer(() -> {
+			return recordWrapper;
+		}).setValueInitializer((value) -> {
+			if (value instanceof RecordWrapper<?> recordWrapperValue) {
+				FieldAccessor.of(field, parent.get()).set(recordWrapperValue.record());
+			}
+		}));
+		doBuildIndex(field.type(), getPathForField(field, path), index, () -> recordWrapper);
+	}
+
+	private void indexMapType(FieldReflector field, Map<Path, PathWriter> index, Path path, Supplier<Object> parent) {
         Path pathForField = getPathForField(field, path);
         if (pathForField.isRoot()) {
             indexMapAsRootType(field, index, parent, pathForField);

@@ -196,7 +196,7 @@ public class GeneralDeserializationTest {
     }
 
     @Test
-    void ignoreSufAndPrefixedWhiteSpaceInPathMappings() {
+    void ignoreSuffixedAndPrefixedWhiteSpaceInPathMappings() {
         // given
         String data = """
                 <?xml version="1.0" encoding="UTF-8"?>

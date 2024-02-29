@@ -51,6 +51,10 @@ public class FieldReflector {
         return field.getAnnotation(annotation) != null;
     }
 
+	public boolean isRecord() {
+		return field.getType().isRecord();
+	}
+
     @Override
     public String toString() {
         return new StringJoiner(", ", FieldReflector.class.getSimpleName() + "[", "]")

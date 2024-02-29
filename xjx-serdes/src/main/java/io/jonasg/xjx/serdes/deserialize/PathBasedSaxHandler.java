@@ -90,6 +90,9 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
                 pathWriter.getValueInitializer().accept(data);
             }
             if (pathWriter.getObjectInitializer() != null && !objectInstances.isEmpty() && objectInstances.size() != 1) {
+				if (pathWriter.getValueInitializer() != null) {
+					pathWriter.getValueInitializer().accept(objectInstances.peek());
+				}
                 objectInstances.pop();
             }
         }
@@ -123,6 +126,10 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
 
     @SuppressWarnings("unchecked")
     public T instance() {
-        return (T) objectInstances.pop();
+		Object instance = objectInstances.pop();
+		if (instance instanceof RecordWrapper recordWrapper) {
+			return (T) recordWrapper.record();
+		}
+		return (T) instance;
     }
 }
