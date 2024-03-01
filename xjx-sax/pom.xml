@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.jonasg</groupId>
         <artifactId>xjx</artifactId>
-        <version>0.2.3</version>
+        <version>0.3.0</version>
     </parent>
 
     <artifactId>xjx-sax</artifactId>
