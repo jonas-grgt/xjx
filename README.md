@@ -25,7 +25,7 @@ Contains the XML serializer and deserializer.
 <dependency>
     <groupId>io.jonasg</groupId>
     <artifactId>xjx-serdes</artifactId>
-    <version>0.2.2</version>
+    <version>${xjx.version}</version>
 </dependency>
 ```
 
