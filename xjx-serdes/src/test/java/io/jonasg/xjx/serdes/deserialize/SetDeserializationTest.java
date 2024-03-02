@@ -2,6 +2,7 @@ package io.jonasg.xjx.serdes.deserialize;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
+import io.jonasg.xjx.serdes.deserialize.ListDeserializationTest.Gpx;
+import io.jonasg.xjx.serdes.deserialize.ListDeserializationTest.Wpt;
 
 public class SetDeserializationTest {
 
@@ -459,7 +462,40 @@ public class SetDeserializationTest {
         Assertions.assertThat(gpx.wayPoints).extracting(r -> r.time).containsExactlyInAnyOrder("2001-11-28T21:05:28Z", "2001-06-02T03:26:55Z");
     }
 
-    static class Gpx {
+
+	@Test
+	void recordWithSetOfRecord() {
+		// given
+		String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<WeatherReport>
+				  <City>
+				    <Name>New York</Name>
+				    <Condition>Sunny</Condition>
+				  </City>
+				  <City>
+				    <Name>London</Name>
+				    <Condition>Cloudy</Condition>
+				  </City>
+				</WeatherReport>
+				""";
+		record CityWeather(@Tag(path = "Condition") String condition,
+						   @Tag(path = "Name") String name) {}
+
+		record WeatherReport(
+				@Tag(path = "/WeatherReport", items = "City") Set<CityWeather> cityWeather) {}
+
+
+		// when
+		var weatherReport = new XjxSerdes().read(data, WeatherReport.class);
+
+		// then
+		assertThat(weatherReport.cityWeather).containsExactly(
+				new CityWeather("Cloudy", "London"),
+				new CityWeather("Sunny", "New York"));
+	}
+
+	static class Gpx {
         public Gpx() {
         }
 

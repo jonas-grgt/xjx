@@ -570,6 +570,36 @@ public class ListDeserializationTest {
         assertThat(gpx.wayPoints.get(1).time).isEqualTo("2001-06-02T03:26:55Z");
     }
 
+	@Test
+	void recordWithListOfRecord() {
+		// given
+		String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<WeatherReport>
+				  <City>
+				    <Name>New York</Name>
+				    <Condition>Sunny</Condition>
+				  </City>
+				  <City>
+				    <Name>London</Name>
+				    <Condition>Cloudy</Condition>
+				  </City>
+				</WeatherReport>
+				""";
+		record CityWeather(@Tag(path = "Condition") String condition, @Tag(path = "Name") String name) {}
+
+		record WeatherReport(@Tag(path = "/WeatherReport", items = "City") List<CityWeather> cityWeather) {}
+
+
+		// when
+		var weatherReport = new XjxSerdes().read(data, WeatherReport.class);
+
+		// then
+		assertThat(weatherReport.cityWeather).containsExactly(
+				new CityWeather("Sunny", "New York"),
+				new CityWeather("Cloudy", "London"));
+	}
+
     static class Gpx {
         public Gpx() {
         }

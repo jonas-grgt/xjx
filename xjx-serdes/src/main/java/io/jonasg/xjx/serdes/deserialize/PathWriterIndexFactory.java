@@ -231,9 +231,15 @@ public class PathWriterIndexFactory {
             if (collectionCacheType.get(typeArgument) != null) {
                 return collectionCacheType.get(typeArgument);
             }
-            Object listTypeInstance = TypeReflector.reflect(typeArgument).instanceReflector().instance();
-            collectionCacheType.put(typeArgument, listTypeInstance);
-            return listTypeInstance;
+			if (typeArgument.isRecord()) {
+				var recordWrapper = new RecordWrapper<>(typeArgument);
+				collectionCacheType.put(typeArgument, recordWrapper);
+				return recordWrapper;
+			} else {
+				Object listTypeInstance = TypeReflector.reflect(typeArgument).instanceReflector().instance();
+				collectionCacheType.put(typeArgument, listTypeInstance);
+				return listTypeInstance;
+			}
         };
     }
 
@@ -278,7 +284,7 @@ public class PathWriterIndexFactory {
             throw new XjxDeserializationException(
                   """
                   Field (%s) requires @Tag to have items parameter describing\
-                   the tag name of a single repeated tag""".formatted(typeArgument.getSimpleName(), field.name()));
+                   the tag name of a single repeated tag""".formatted(typeArgument.getSimpleName() ));
         }
         Path path = Path.parse(tag.path()).append(Path.parse(tag.items()));
         index.put(path, PathWriter.objectInitializer(() -> {
@@ -286,7 +292,12 @@ public class PathWriterIndexFactory {
             Object listTypeInstance = listTypeInstanceSupplier.get();
             list.add(listTypeInstance);
             return listTypeInstance;
-        }));
+        }).setValueInitializer((value) -> {
+			if (value instanceof RecordWrapper<?> recordWrapperValue) {
+				list.remove(recordWrapperValue);
+				list.add(recordWrapperValue.record());
+			}
+		}));
         doBuildIndex(typeArgument, path, index, listTypeInstanceSupplier);
     }
 
