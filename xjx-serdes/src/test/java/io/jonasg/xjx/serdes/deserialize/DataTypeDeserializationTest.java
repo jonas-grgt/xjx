@@ -38,23 +38,39 @@ public class DataTypeDeserializationTest {
         assertThat(dataTypes.String).isEqualTo("11");
     }
 
-
-    @Test
-    void deserialize_IntegerField() {
-        // given
-        String data = """
+	@Test
+	void deserialize_IntegerField() {
+		// given
+		String data = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <DataTypes>
                     <Integer>11</Integer>
                 </DataTypes>
                 """;
 
-        // when
-        DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
+		// when
+		DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
 
-        // then
-        assertThat(dataTypes.Integer).isEqualTo(11);
-    }
+		// then
+		assertThat(dataTypes.Integer).isEqualTo(11);
+	}
+
+	@Test
+	void deserialize_primitiveIntField() {
+		// given
+		String data = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <DataTypes>
+                    <primitiveInt>11</primitiveInt>
+                </DataTypes>
+                """;
+
+		// when
+		DataTypes dataTypes = new XjxSerdes().read(data, DataTypes.class);
+
+		// then
+		assertThat(dataTypes.primitiveInt).isEqualTo(11);
+	}
 
     @Test
     void deserialize_LongField() {
@@ -501,11 +517,14 @@ public class DataTypeDeserializationTest {
 
     static class DataTypes {
 
-        @Tag(path = "/DataTypes/String")
+		@Tag(path = "/DataTypes/String")
         String String;
 
         @Tag(path = "/DataTypes/Integer")
         Integer Integer;
+
+		@Tag(path = "/DataTypes/primitiveInt")
+		int primitiveInt;
 
         @Tag(path = "/DataTypes/Long")
         Long Long;

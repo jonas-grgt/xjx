@@ -7,7 +7,7 @@ import io.jonasg.xjx.serdes.reflector.FieldReflector;
 public interface FieldAccessor {
 
     static FieldAccessor of(FieldReflector field, Object instance) {
-		if (instance instanceof RecordWrapper recordWrapper) {
+		if (instance instanceof RecordWrapper<?> recordWrapper) {
 			return new RecordFieldAccessor(field, recordWrapper);
 		} else {
 			var setterFieldAccessor = new SetterFieldAccessor(field, instance);

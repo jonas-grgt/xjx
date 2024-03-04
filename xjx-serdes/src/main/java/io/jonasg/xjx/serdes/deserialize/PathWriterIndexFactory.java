@@ -27,7 +27,7 @@ import io.jonasg.xjx.serdes.reflector.TypeReflector;
 public class PathWriterIndexFactory {
 
     public static final List<Class<?>> BASIC_TYPES = List.of(
-            String.class, Integer.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
+            String.class, Integer.class, int.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
             double.class, char.class, Character.class, LocalDate.class, LocalDateTime.class, ZonedDateTime.class);
     private final Map<Class<?>, Object> collectionCacheType = new HashMap<>();
 

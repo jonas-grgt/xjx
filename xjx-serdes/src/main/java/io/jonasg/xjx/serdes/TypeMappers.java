@@ -13,6 +13,7 @@ public final class TypeMappers {
 
     static List<Class<Double>> DOUBLE_TYPES = List.of(double.class, Double.class);
     static List<Class<Long>> LONG_TYPES = List.of(long.class, Long.class);
+	static List<Class<Integer>> INTEGER_TYPES = List.of(int.class, Integer.class);
     static List<Class<Character>> CHAR_TYPES = List.of(char.class, Character.class);
     static List<Class<Boolean>> BOOLEAN_TYPES = List.of(boolean.class, Boolean.class);
 
@@ -20,6 +21,7 @@ public final class TypeMappers {
 
     static {
         TYPES = new HashSet<>();
+		TYPES.addAll(INTEGER_TYPES);
         TYPES.addAll(DOUBLE_TYPES);
         TYPES.addAll(LONG_TYPES);
         TYPES.addAll(CHAR_TYPES);
@@ -33,7 +35,7 @@ public final class TypeMappers {
         if (type.equals(String.class)) {
             mapper = String::valueOf;
         }
-        if (type.equals(Integer.class)) {
+		if (INTEGER_TYPES.contains(type)) {
             mapper = value -> Integer.parseInt(String.valueOf(value));
         }
         if (LONG_TYPES.contains(type)) {
