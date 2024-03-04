@@ -35,8 +35,10 @@ public class Path implements Iterable<Section> {
     }
 
     public Path appendAttribute(String attribute) {
-        this.attribute = attribute;
-        return this;
+		var copiedSections = new LinkedList<>(this.sections);
+		var path = new Path(copiedSections);
+		path.attribute = attribute;
+		return path;
     }
 
     public Path append(String section) {

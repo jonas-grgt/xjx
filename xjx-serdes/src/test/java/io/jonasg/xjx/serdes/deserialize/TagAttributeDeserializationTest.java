@@ -1,8 +1,9 @@
 package io.jonasg.xjx.serdes.deserialize;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,25 +26,43 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.String).isEqualTo("11");
+        assertThat(dataTypes.String).isEqualTo("11");
     }
 
-    @Test
-    void deserialize_IntegerField() {
-        // given
-        String data = """
+	@Test
+	void deserialize_IntegerField() {
+		// given
+		String data = """
                     <?xml version="1.0" encoding="UTF-8"?>
                     <DataTypes>
                         <Integer value="11"/>
                     </DataTypes>
                     """;
 
-        // when
-        DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
+		// when
+		DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
-        // then
-        Assertions.assertThat(dataTypes.Integer).isEqualTo(11);
-    }
+		// then
+		assertThat(dataTypes.Integer).isEqualTo(11);
+	}
+
+
+	@Test
+	void deserialize_primitiveIntField() {
+		// given
+		String data = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <DataTypes>
+                        <primitiveInt value="11"/>
+                    </DataTypes>
+                    """;
+
+		// when
+		DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
+
+		// then
+		assertThat(dataTypes.primitiveInt).isEqualTo(11);
+	}
 
     @Test
     void deserialize_LongField() {
@@ -59,7 +78,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.Long).isEqualTo(11L);
+        assertThat(dataTypes.Long).isEqualTo(11L);
     }
 
     @Test
@@ -76,7 +95,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveLong).isEqualTo(11L);
+        assertThat(dataTypes.primitiveLong).isEqualTo(11L);
     }
 
     @Test
@@ -93,7 +112,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.BigDecimal).isEqualTo(BigDecimal.valueOf(11));
+        assertThat(dataTypes.BigDecimal).isEqualTo(BigDecimal.valueOf(11));
     }
 
     @Test
@@ -110,7 +129,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.Double).isEqualTo(Double.valueOf(11));
+        assertThat(dataTypes.Double).isEqualTo(Double.valueOf(11));
     }
 
     @Test
@@ -127,7 +146,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveDouble).isEqualTo(Double.valueOf(11));
+        assertThat(dataTypes.primitiveDouble).isEqualTo(Double.valueOf(11));
     }
 
     @Test
@@ -144,7 +163,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.multipleCharacters).isEqualTo('A');
+        assertThat(dataTypes.multipleCharacters).isEqualTo('A');
     }
 
     @Test
@@ -161,7 +180,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.primitiveChar).isEqualTo('A');
+        assertThat(dataTypes.primitiveChar).isEqualTo('A');
     }
 
     @Test
@@ -178,7 +197,7 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.Character).isEqualTo(Character.valueOf('A'));
+        assertThat(dataTypes.Character).isEqualTo(Character.valueOf('A'));
     }
 
     @ParameterizedTest
@@ -195,8 +214,8 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.BooleanTrue).isTrue();
-        Assertions.assertThat(dataTypes.booleanTrue).isTrue();
+        assertThat(dataTypes.BooleanTrue).isTrue();
+        assertThat(dataTypes.booleanTrue).isTrue();
     }
 
     @ParameterizedTest
@@ -213,8 +232,8 @@ public class TagAttributeDeserializationTest {
         DataTypeHolder dataTypes = new XjxSerdes().read(data, DataTypeHolder.class);
 
         // then
-        Assertions.assertThat(dataTypes.BooleanFalse).isFalse();
-        Assertions.assertThat(dataTypes.booleanFalse).isFalse();
+        assertThat(dataTypes.BooleanFalse).isFalse();
+        assertThat(dataTypes.booleanFalse).isFalse();
     }
 
     @Test
@@ -231,8 +250,39 @@ public class TagAttributeDeserializationTest {
         ParentHolder parentHolder = new XjxSerdes().read(data, ParentHolder.class);
 
         // then
-        Assertions.assertThat(parentHolder.nestedField.String).isEqualTo("11");
+        assertThat(parentHolder.nestedField.String).isEqualTo("11");
     }
+
+	@Test
+	void deserialize_mapValueAndAtTheSameTimeAttributeValuesOfOneTag() {
+		// given
+		String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<Person>
+					<Name age="18" sex="MALE">John</Name>
+				</Person>
+				""";
+
+		// when
+		var person = new XjxSerdes().read(data, Person.class);
+
+		// then
+		assertThat(person.name).isEqualTo("John");
+		assertThat(person.sex).isEqualTo("MALE");
+		assertThat(person.age).isEqualTo(18);
+	}
+
+	public static class Person {
+		@Tag(path = "/Person/Name")
+		String name;
+
+		@Tag(path = "/Person/Name", attribute = "sex")
+		String sex;
+
+		@Tag(path = "/Person/Name", attribute = "age")
+		int age;
+	}
+
 
     public static class DataTypeHolder {
         public DataTypeHolder() {
@@ -241,8 +291,11 @@ public class TagAttributeDeserializationTest {
         @Tag(path = "/DataTypes/String", attribute = "value")
         String String;
 
-        @Tag(path = "/DataTypes/Integer", attribute = "value")
-        Integer Integer;
+		@Tag(path = "/DataTypes/Integer", attribute = "value")
+		Integer Integer;
+
+		@Tag(path = "/DataTypes/primitiveInt", attribute = "value")
+		int primitiveInt;
 
         @Tag(path = "/DataTypes/Long", attribute = "value")
         Long Long;
