@@ -49,7 +49,7 @@ public class Location {
     private Location() {
     }
 
-    @Tag(path = "City")
+    @Tag(path = "Country", attribute = "City")
     private String City;
 
     @Tag(path = "Country")
@@ -62,8 +62,7 @@ String document = """
     <?xml version="1.0" encoding="UTF-8"?>
     <w:WeatherData xmlns:xjx="https://github.com/jonas-grgt/xjx">
       <w:Location>
-          <w:City>New York</w:City>
-          <w:Country>USA</w:Country>
+          <w:Country City="New York">USA</w:Country>
       </w:Location>
       <w:CurrentConditions>
         <w:Temperature>
@@ -147,6 +146,28 @@ class Weather {
 ```
 
 ### Attributes
+
+Attributes can be mapped using the `attribute` property of the `@Tag` annotation.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Person>
+	<Name age="18" sex="MALE">John</Name>
+</Person>
+```
+
+```java
+public class Person {
+    @Tag(path = "/Person/Name")
+    String name;
+
+    @Tag(path = "/Person/Name", attribute = "sex")
+    String sex;
+
+    @Tag(path = "/Person/Name", attribute = "age")
+    int age;
+}
+```
 
 
 ### Collection types
