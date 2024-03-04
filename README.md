@@ -12,8 +12,9 @@ Xjx exists out of two modules:
 # 🔑 Key Features
 - Explicitly map fields to specific tags using `@Tag`
 - Select specific tags using an **XPath** like expression `@Tag(path = "/WeatherData/Location/City)`
-- Out-of-the-box support for most common data types
+- Out-of-the-box support for most common data types (including enums, collections, and maps)
 - Explicit deserialization of values using `@ValueDeserialization`
+- Support for records
 
 # ✨ xjx-serdes
 
@@ -169,6 +170,14 @@ public class Person {
 }
 ```
 
+### Enum types
+
+Xjx offers straightforward and efficient deserialization support for Enum types. 
+When mapping XML character data to Enum fields in Java, Xjx matches the character data with the names of the Enum constants.
+Deserialization Rules for Enums
+
+- Direct Name Matching: The deserializer matches the XML character data directly with the names of the Enum constants. The match is case-sensitive.
+- Defaulting to Null: If the XML character data does not match any Enum constant names, the field is set to null. This is the default behavior when a match cannot be established.
 
 ### Collection types
 When deserializing an XML document containing repeated elements, it can be mapped onto one of the collection types `List` or `Set`.
