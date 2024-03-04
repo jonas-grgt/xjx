@@ -1,16 +1,17 @@
 package io.jonasg.xjx.scanners;
 
-import io.jonasg.xjx.BufferedPositionedReader;
-import io.jonasg.xjx.EndTag;
-import io.jonasg.xjx.Token;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import static org.assertj.core.api.Assertions.*;
+import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Test;
+
+import io.jonasg.xjx.BufferedPositionedReader;
+import io.jonasg.xjx.EndTag;
+import io.jonasg.xjx.Token;
 
 class EndTagScannerTest {
 

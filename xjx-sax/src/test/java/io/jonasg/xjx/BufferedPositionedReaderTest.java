@@ -1,10 +1,10 @@
 package io.jonasg.xjx;
 
+import java.io.StringReader;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.StringReader;
 
 class BufferedPositionedReaderTest {
 

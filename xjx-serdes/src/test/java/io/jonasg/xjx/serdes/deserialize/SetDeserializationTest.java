@@ -2,7 +2,6 @@ package io.jonasg.xjx.serdes.deserialize;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,8 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
-import io.jonasg.xjx.serdes.deserialize.ListDeserializationTest.Gpx;
-import io.jonasg.xjx.serdes.deserialize.ListDeserializationTest.Wpt;
 
 public class SetDeserializationTest {
 

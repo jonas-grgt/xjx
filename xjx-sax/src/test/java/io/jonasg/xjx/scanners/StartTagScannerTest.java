@@ -1,16 +1,17 @@
 package io.jonasg.xjx.scanners;
 
-import io.jonasg.xjx.Attributes;
-import io.jonasg.xjx.BufferedPositionedReader;
-import io.jonasg.xjx.StartTag;
-import io.jonasg.xjx.Token;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+import io.jonasg.xjx.Attributes;
+import io.jonasg.xjx.BufferedPositionedReader;
+import io.jonasg.xjx.StartTag;
+import io.jonasg.xjx.Token;
 
 class StartTagScannerTest {
 

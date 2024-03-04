@@ -1,5 +1,11 @@
 package io.jonasg.xjx;
 
+/**
+ * Represents a single token in an XML document.
+ * @param type the type of the token
+ * @param value the value of the token or null if not relevant for that token type
+ * @param <T> the type of the value
+ */
 public record Token<T>(Type type, T value) {
 
     public Token(Type type) {

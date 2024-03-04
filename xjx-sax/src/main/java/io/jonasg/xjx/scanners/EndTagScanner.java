@@ -1,11 +1,11 @@
 package io.jonasg.xjx.scanners;
 
+import java.util.Objects;
+
 import io.jonasg.xjx.EndTag;
 import io.jonasg.xjx.PositionedReader;
 import io.jonasg.xjx.Token;
 import io.jonasg.xjx.TokenEmitter;
-
-import java.util.Objects;
 
 class EndTagScanner implements Scanner {
 

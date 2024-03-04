@@ -1,10 +1,9 @@
 package io.jonasg.xjx.scanners;
 
+import static io.jonasg.xjx.Token.Type.CLOSE_COMMENT;
 import io.jonasg.xjx.PositionedReader;
 import io.jonasg.xjx.Token;
 import io.jonasg.xjx.TokenEmitter;
-
-import static io.jonasg.xjx.Token.Type.CLOSE_COMMENT;
 
 class CommentBodyScanner implements Scanner {
     @Override

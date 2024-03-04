@@ -1,6 +1,5 @@
 package io.jonasg.xjx;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;

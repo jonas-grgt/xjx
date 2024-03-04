@@ -1,15 +1,15 @@
 package io.jonasg.xjx;
 
-import org.assertj.core.api.Condition;
-import org.junit.jupiter.api.Test;
-
-import java.io.BufferedReader;
-import java.io.StringReader;
-
 import static io.jonasg.xjx.Token.Type.CHARACTER_DATA;
 import static io.jonasg.xjx.Token.Type.START_TAG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Index.atIndex;
+
+import java.io.BufferedReader;
+import java.io.StringReader;
+
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.Test;
 
 class TokenizerIntegrationTest {
 

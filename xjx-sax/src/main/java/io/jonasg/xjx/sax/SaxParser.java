@@ -1,12 +1,12 @@
 package io.jonasg.xjx.sax;
 
+import java.io.Reader;
+import java.util.List;
+
 import io.jonasg.xjx.EndTag;
 import io.jonasg.xjx.StartTag;
 import io.jonasg.xjx.Token;
 import io.jonasg.xjx.Tokenizer;
-
-import java.io.Reader;
-import java.util.List;
 
 public class SaxParser {
 

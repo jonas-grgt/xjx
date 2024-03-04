@@ -1,14 +1,17 @@
 package io.jonasg.xjx;
 
-import io.jonasg.xjx.scanners.Scanner;
-import io.jonasg.xjx.scanners.WhiteSpaceScanner;
-
 import java.io.Reader;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import io.jonasg.xjx.scanners.Scanner;
+import io.jonasg.xjx.scanners.WhiteSpaceScanner;
+
+/**
+ * Tokenize an XML document into a stream of {@link Token}.
+ */
 public class Tokenizer {
 
     public Stream<Token<?>> tokenize(Reader reader) {
