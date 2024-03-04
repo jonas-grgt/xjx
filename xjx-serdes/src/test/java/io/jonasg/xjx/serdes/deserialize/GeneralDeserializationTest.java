@@ -239,4 +239,31 @@ public class GeneralDeserializationTest {
 		@Tag(path = "/DataTypes/Double")
 		Double Double;
 	}
+
+	@Test
+	void namespaceSupport() {
+		// given
+		String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<xjx:Tables xmlns:xjx="https://github.com/jonas-grgt/xjx">
+					<xjx:TableA>5.7</xjx:TableA>
+					<TableB>TableB</TableB>
+				</xjx:Tables>
+				""";
+
+		// when
+		var holder = new XjxSerdes().read(data, NamespaceHolder.class);
+
+		// then
+		assertThat(holder.tableA).isEqualTo(5.7D);
+		assertThat(holder.tableB).isEqualTo("TableB");
+	}
+
+	static class NamespaceHolder {
+		@Tag(path = "/Tables/TableA")
+		Double tableA;
+
+		@Tag(path = "/Tables/TableB")
+		String tableB;
+	}
 }

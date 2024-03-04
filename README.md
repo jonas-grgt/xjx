@@ -60,23 +60,23 @@ public class Location {
 ```java
 String document = """
     <?xml version="1.0" encoding="UTF-8"?>
-    <WeatherData>
-      <Location>
-          <City>New York</City>
-          <Country>USA</Country>
-      </Location>
-      <CurrentConditions>
-        <Temperature>
-          <Value>75</Value>
-            <Unit><![CDATA[°F]]></Unit>
-        </Temperature>
-        <Humidity>
-          <Value>60</Value>
-          <Unit>%</Unit>
-        </Humidity>
-        <WeatherCondition>Sunny</WeatherCondition>
-      </CurrentConditions>
-    </WeatherData>""";
+    <w:WeatherData xmlns:xjx="https://github.com/jonas-grgt/xjx">
+      <w:Location>
+          <w:City>New York</w:City>
+          <w:Country>USA</w:Country>
+      </w:Location>
+      <w:CurrentConditions>
+        <w:Temperature>
+          <w:Value>75</Value>
+            <w:Unit><![CDATA[°F]]></w:Unit>
+        </w:Temperature>
+        <w:Humidity>
+          <w:Value>60</w:Value>
+          <w:Unit>%</w:Unit>
+        </w:Humidity>
+        <w:WeatherCondition>Sunny</w:WeatherCondition>
+      </w:CurrentConditions>
+    </w:WeatherData>""";
 
 
 var xjx = new XjxSerdes();
