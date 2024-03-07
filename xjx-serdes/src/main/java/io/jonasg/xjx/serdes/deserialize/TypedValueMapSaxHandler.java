@@ -6,10 +6,13 @@ import java.util.Objects;
 
 import io.jonasg.xjx.sax.Attribute;
 import io.jonasg.xjx.sax.SaxHandler;
+import io.jonasg.xjx.serdes.deserialize.config.XjxConfiguration;
 
 public class TypedValueMapSaxHandler implements SaxHandler {
 
 	private final Class<?> valueType;
+
+	private final XjxConfiguration configuration;
 
 	private final Map<String, Object> instance;
 
@@ -17,10 +20,11 @@ public class TypedValueMapSaxHandler implements SaxHandler {
 
     private String activeKey;
 
-	public TypedValueMapSaxHandler(MapWithTypeInfo instance) {
+	public TypedValueMapSaxHandler(MapWithTypeInfo instance, XjxConfiguration configuration) {
 		this.instance = instance.map();
         this.valueType = instance.valueType();
-    }
+		this.configuration = configuration;
+	}
 
     @Override
     public void startDocument() {
@@ -31,7 +35,7 @@ public class TypedValueMapSaxHandler implements SaxHandler {
         if (this.activeKey == null) {
             this.activeKey = name;
             objectPathBasedSaxHandler = new PathBasedSaxHandler<>(rootTag ->
-                    new PathWriterIndexFactory().createIndexForType(valueType, this.activeKey), this.activeKey);
+                    new PathWriterIndexFactory(configuration).createIndexForType(valueType, this.activeKey), this.activeKey, configuration);
         } else {
             objectPathBasedSaxHandler.startTag(namespace, name, attributes);
         }

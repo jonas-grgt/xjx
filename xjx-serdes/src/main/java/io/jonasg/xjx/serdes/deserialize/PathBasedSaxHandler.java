@@ -9,12 +9,15 @@ import java.util.function.Function;
 import io.jonasg.xjx.sax.Attribute;
 import io.jonasg.xjx.sax.SaxHandler;
 import io.jonasg.xjx.serdes.Path;
+import io.jonasg.xjx.serdes.deserialize.config.XjxConfiguration;
 
 public class PathBasedSaxHandler<T> implements SaxHandler {
 
     private final Function<String, Map<Path, PathWriter>> indexSupplier;
 
-    private final LinkedList<Object> objectInstances = new LinkedList<>();
+	private final XjxConfiguration configuration;
+
+	private final LinkedList<Object> objectInstances = new LinkedList<>();
 
     private String rootTag;
 
@@ -28,13 +31,15 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
 
     private String mapStartTag;
 
-    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier) {
+    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier, XjxConfiguration configuration) {
         this.indexSupplier = indexSupplier;
-    }
+		this.configuration = configuration;
+	}
 
-    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier, String rootTag) {
+    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier, String rootTag, XjxConfiguration configuration) {
         this.indexSupplier = indexSupplier;
         this.rootTag = rootTag;
+		this.configuration = configuration;
         handleRootTag(rootTag);
     }
 
@@ -60,7 +65,7 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
                         this.mapRootSaxHandlerDelegate = new MapRootSaxHandler((HashMap<String, Object>) object);
                         this.mapStartTag = name;
                     } else if (object instanceof MapWithTypeInfo mapWithTypeInfo) {
-                        this.mapRootSaxHandlerDelegate = new TypedValueMapSaxHandler(mapWithTypeInfo);
+                        this.mapRootSaxHandlerDelegate = new TypedValueMapSaxHandler(mapWithTypeInfo, configuration);
                         this.mapStartTag = name;
                     }
                     this.objectInstances.push(object);

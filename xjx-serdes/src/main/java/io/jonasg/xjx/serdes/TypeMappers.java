@@ -1,5 +1,8 @@
 package io.jonasg.xjx.serdes;
 
+import io.jonasg.xjx.serdes.deserialize.XjxDeserializationException;
+import io.jonasg.xjx.serdes.deserialize.config.XjxConfiguration;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +33,7 @@ public final class TypeMappers {
         TYPES.add(LocalDate.class);
     }
 
-    public static Function<Object, Object> forType(Class<?> type) {
+    public static Function<Object, Object> forType(Class<?> type, XjxConfiguration configuration) {
         Function<Object, Object> mapper = Function.identity();
         if (type.equals(String.class)) {
             mapper = String::valueOf;
@@ -69,7 +72,13 @@ public final class TypeMappers {
             mapper = value -> ZonedDateTime.parse(String.valueOf(value));
         }
         if (type.isEnum()) {
-            mapper = value -> toEnum(type, String.valueOf(value));
+			mapper = value -> {
+				Object enumValue = toEnum(type, String.valueOf(value));
+				if (enumValue == null && configuration.failOnUnknownEnumValue()) {
+					throw new XjxDeserializationException("Cannot map value '" + value + "' to enum " + type.getSimpleName());
+				}
+				return enumValue;
+			};
         }
         return mapper;
     }
