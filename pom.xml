@@ -4,7 +4,7 @@
 
     <groupId>io.jonasg</groupId>
     <artifactId>xjx</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3</version>
     <packaging>pom</packaging>
     <modules>
         <module>xjx-sax</module>
