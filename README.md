@@ -218,6 +218,43 @@ Example XML document:
 </WeatherData>
 ```
 
+### Map mixed tags within a container to multiple collections
+
+Xjx is able to map repeated mixed tags within a container or 
+at the root tag to multiple collections.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<WeatherReport>
+  <Locations>
+    <City name="A"/>
+    <Town name="B"/>
+    <Town name="D"/>
+    <Town name="E"/>
+    <City name="F"/>
+    <City name="H"/>
+    <Town name="C"/>
+    <City name="G"/>
+  </Locations>
+</WeatherReport>
+```
+
+```java
+class WeatherReport {
+
+  @Tag(path = "/WeatherReport/Locations", items = "Town")
+  List<Town> towns;
+
+  @Tag(path = "/WeatherReport/Locations", items = "City")
+  List<City> cities;
+}
+
+class Town {
+  @Tag(path = "/WeatherReport/Locations/Town", attribute = "name")
+  String name;
+}
+```
+
 ### Map types
 
 Maps can be deserialized either as a field or a top-level type. Consider the following XML document:

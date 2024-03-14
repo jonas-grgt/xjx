@@ -5,13 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import io.jonasg.xjx.serdes.Tag;
 import io.jonasg.xjx.serdes.XjxSerdes;
 
+@SuppressWarnings("unused")
 public class ListDeserializationTest {
 
     @Test
@@ -598,6 +602,313 @@ public class ListDeserializationTest {
 		assertThat(weatherReport.cityWeather).containsExactly(
 				new CityWeather("Sunny", "New York"),
 				new CityWeather("Cloudy", "London"));
+	}
+
+	@Nested
+	class RepeatedTagsMappedToMultipleListsTest {
+
+		@Test
+		void wrappedInContainerTag() {
+			String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				 <WeatherReport>
+				  <Locations>
+				   <City name="A"/>
+				   <Town name="B"/>
+				   <Town name="D"/>
+				   <Town name="E"/>
+				   <City name="F"/>
+				   <City name="H"/>
+				   <Town name="C"/>
+				   <City name="G"/>
+				  </Locations>
+				 </WeatherReport>
+				 """;
+			XjxSerdes xjx = new XjxSerdes();
+			var weatherReport = xjx.read(data, WeatherReport.class);
+
+			assertThat(weatherReport.cities)
+					.hasSize(4)
+					.containsExactly(new City("A"), new City("F"), new City("H"), new City("G"));
+			assertThat(weatherReport.towns)
+					.hasSize(4)
+					.containsExactly(new Town("B"), new Town("D"), new Town("E"), new Town("C"));
+		}
+
+		@Test
+		void atRootLevel() {
+			String data = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				 <WeatherReport>
+				  <City name="A"/>
+				  <Town name="B"/>
+				  <Town name="D"/>
+				  <Town name="E"/>
+				  <City name="F"/>
+				  <City name="H"/>
+				  <Town name="C"/>
+				  <City name="G"/>
+				 </WeatherReport>
+				 """;
+			XjxSerdes xjx = new XjxSerdes();
+			var weatherReport = xjx.read(data, WeatherReportAtRoot.class);
+
+			assertThat(weatherReport.cities)
+					.hasSize(4)
+					.containsExactly(new CityAtRoot("A"), new CityAtRoot("F"), new CityAtRoot("H"), new CityAtRoot("G"));
+			assertThat(weatherReport.towns)
+					.hasSize(4)
+					.containsExactly(new TownAtRoot("B"), new TownAtRoot("D"), new TownAtRoot("E"), new TownAtRoot("C"));
+		}
+
+		@Test
+		void repeatedTagContainingCollection() {
+			String data = """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<manifest>
+			 <foo name="A"/>
+			 <foo name="B"/>
+			 
+			 <bar name="X">
+			     <info val="InfoValX1"/>
+			     <info val="InfoValX2"/>
+			 </bar>
+			 <bar name="Z">
+			     <info val="InfoValZ1"/>
+			 </bar>
+			</manifest>
+			""";
+			XjxSerdes xjx = new XjxSerdes();
+			Manifest manifest = xjx.read(data, Manifest.class);
+
+			assertThat(manifest.foos)
+					.hasSize(2)
+					.containsExactly(new Foo("A"), new Foo("B"));
+			assertThat(manifest.bars)
+					.hasSize(2)
+					.containsExactly(
+							new Bar("X", List.of(new Info("InfoValX1"), new Info("InfoValX2"))),
+							new Bar("Z", List.of(new Info("InfoValZ1"))));
+		}
+	}
+
+	private static class Manifest {
+		@Tag(path = "/manifest", items = "foo")
+		private List<Foo> foos;
+
+		@Tag(path = "/manifest", items = "bar")
+		private List<Bar> bars;
+	}
+
+	private static class Foo {
+		@Tag(path = "/manifest/foo", attribute = "name")
+		private String name;
+
+		public Foo() {
+		}
+
+		public Foo(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Foo foo = (Foo) o;
+			return Objects.equals(name, foo.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name);
+		}
+	}
+
+	private static class Bar {
+		@Tag(path = "/manifest/bar", attribute = "name")
+		private String name;
+
+		@Tag(path = "/manifest/bar", items = "info")
+		private List<Info> infos;
+
+		public Bar() {
+		}
+
+		public Bar(String name, List<Info> infos) {
+			this.name = name;
+			this.infos = infos;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Bar bar = (Bar) o;
+			return Objects.equals(name, bar.name) && Objects.equals(infos, bar.infos);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, infos);
+		}
+
+		@Override
+		public String toString() {
+			return new StringJoiner(", ", Bar.class.getSimpleName() + "[", "]")
+					.add("name='" + name + "'")
+					.add("infos=" + infos)
+					.toString();
+		}
+	}
+
+	private static class Info {
+		@Tag(path = "/manifest/bar/info", attribute = "val")
+		private String val;
+
+		public Info() {
+		}
+
+		public Info(String val) {
+			this.val = val;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Info info = (Info) o;
+			return Objects.equals(val, info.val);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(val);
+		}
+	}
+
+	static class TownAtRoot {
+		public TownAtRoot() {
+		}
+
+		@Tag(path = "/WeatherReport/Town", attribute = "name")
+		String name;
+
+		public TownAtRoot(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			TownAtRoot townAtRoot = (TownAtRoot) o;
+			return Objects.equals(name, townAtRoot.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name);
+		}
+	}
+
+	static class CityAtRoot {
+		public CityAtRoot() {
+		}
+
+		@Tag(path = "/WeatherReport/City", attribute = "name")
+		String name;
+
+		public CityAtRoot(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			CityAtRoot cityAtRoot = (CityAtRoot) o;
+			return Objects.equals(name, cityAtRoot.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name);
+		}
+	}
+
+	static class WeatherReportAtRoot {
+
+		public WeatherReportAtRoot() {
+		}
+
+		@Tag(path = "/WeatherReport", items = "Town")
+		List<TownAtRoot> towns;
+
+		@Tag(path = "/WeatherReport", items = "City")
+		List<CityAtRoot> cities;
+	}
+
+	static class Town {
+		public Town() {
+		}
+
+		@Tag(path = "/WeatherReport/Locations/Town", attribute = "name")
+		String name;
+
+		public Town(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Town townAtRoot = (Town) o;
+			return Objects.equals(name, townAtRoot.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name);
+		}
+	}
+
+	static class City {
+		public City() {
+		}
+
+		@Tag(path = "/WeatherReport/Locations/City", attribute = "name")
+		String name;
+
+		public City(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			City cityAtRoot = (City) o;
+			return Objects.equals(name, cityAtRoot.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name);
+		}
+	}
+
+	static class WeatherReport {
+
+		public WeatherReport() {
+		}
+
+		@Tag(path = "/WeatherReport/Locations", items = "Town")
+		List<Town> towns;
+
+		@Tag(path = "/WeatherReport/Locations", items = "City")
+		List<City> cities;
 	}
 
     static class Gpx {

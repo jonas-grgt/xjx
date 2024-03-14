@@ -13,7 +13,7 @@ import io.jonasg.xjx.serdes.deserialize.config.XjxConfiguration;
 
 public class PathBasedSaxHandler<T> implements SaxHandler {
 
-    private final Function<String, Map<Path, PathWriter>> indexSupplier;
+    private final Function<String, PathWriterIndex> indexSupplier;
 
 	private final XjxConfiguration configuration;
 
@@ -23,7 +23,7 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
 
     private Path path;
 
-    private Map<Path, PathWriter> pathWriterIndex;
+    private PathWriterIndex pathWriterIndex;
 
     private String data;
 
@@ -31,12 +31,12 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
 
     private String mapStartTag;
 
-    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier, XjxConfiguration configuration) {
+    public PathBasedSaxHandler(Function<String, PathWriterIndex> indexSupplier, XjxConfiguration configuration) {
         this.indexSupplier = indexSupplier;
 		this.configuration = configuration;
 	}
 
-    public PathBasedSaxHandler(Function<String, Map<Path, PathWriter>> indexSupplier, String rootTag, XjxConfiguration configuration) {
+    public PathBasedSaxHandler(Function<String, PathWriterIndex> indexSupplier, String rootTag, XjxConfiguration configuration) {
         this.indexSupplier = indexSupplier;
         this.rootTag = rootTag;
 		this.configuration = configuration;
@@ -57,24 +57,26 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
             handleRootTag(name);
         } else {
             this.path = path.append(name);
-            var pathWriter = pathWriterIndex.get(path);
-            if (pathWriter != null) {
-                if (pathWriter.getObjectInitializer() != null) {
-                    Object object = pathWriter.getObjectInitializer().get();
-                    if (object instanceof Map) {
-                        this.mapRootSaxHandlerDelegate = new MapRootSaxHandler((HashMap<String, Object>) object);
-                        this.mapStartTag = name;
-                    } else if (object instanceof MapWithTypeInfo mapWithTypeInfo) {
-                        this.mapRootSaxHandlerDelegate = new TypedValueMapSaxHandler(mapWithTypeInfo, configuration);
-                        this.mapStartTag = name;
-                    }
-                    this.objectInstances.push(object);
-                }
+            List<PathWriter> pathWriters = pathWriterIndex.get(path);
+            if (pathWriters != null) {
+				pathWriters.forEach(pathWriter -> {
+					if (pathWriter.getObjectInitializer() != null) {
+						Object object = pathWriter.getObjectInitializer().get();
+						if (object instanceof Map) {
+							this.mapRootSaxHandlerDelegate = new MapRootSaxHandler((HashMap<String, Object>) object);
+							this.mapStartTag = name;
+						} else if (object instanceof MapWithTypeInfo mapWithTypeInfo) {
+							this.mapRootSaxHandlerDelegate = new TypedValueMapSaxHandler(mapWithTypeInfo, configuration);
+							this.mapStartTag = name;
+						}
+						this.objectInstances.push(object);
+					}
+				});
             }
             attributes.forEach(a -> {
-                var attributeWriter = pathWriterIndex.get(path.appendAttribute(a.name()));
-                if (attributeWriter != null) {
-                    attributeWriter.getValueInitializer().accept(a.value());
+                List<PathWriter> attributeWriters = pathWriterIndex.get(path.appendAttribute(a.name()));
+                if (attributeWriters != null) {
+					attributeWriters.stream().forEach(attributeWriter -> attributeWriter.getValueInitializer().accept(a.value()));
                 }
             });
         }
@@ -89,17 +91,19 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
                 this.mapRootSaxHandlerDelegate.endTag(namespace, name);
             }
         }
-        PathWriter pathWriter = pathWriterIndex.get(path);
-        if (pathWriter != null) {
-            if (data != null) {
-                pathWriter.getValueInitializer().accept(data);
-            }
-            if (pathWriter.getObjectInitializer() != null && !objectInstances.isEmpty() && objectInstances.size() != 1) {
-				if (pathWriter.getValueInitializer() != null) {
-					pathWriter.getValueInitializer().accept(objectInstances.peek());
+        List<PathWriter> pathWriters = pathWriterIndex.get(path);
+        if (pathWriters != null) {
+			pathWriters.forEach(pathWriter -> {
+				if (data != null) {
+					pathWriter.getValueInitializer().accept(data);
 				}
-                objectInstances.pop();
-            }
+				if (pathWriter.getObjectInitializer() != null && !objectInstances.isEmpty() && objectInstances.size() != 1) {
+					 if (pathWriter.getValueInitializer() != null) {
+						 pathWriter.getValueInitializer().accept(objectInstances.peek());
+					 }
+					objectInstances.pop();
+				}
+			});
         }
         data = null;
         path = path.pop();
@@ -117,15 +121,17 @@ public class PathBasedSaxHandler<T> implements SaxHandler {
         this.pathWriterIndex = indexSupplier.apply(name);
         this.rootTag = name;
         path = Path.of(name);
-        PathWriter pathWriter = pathWriterIndex.get(path);
-        if (pathWriter != null) {
-            Object parent = pathWriter.getRootInitializer().get();
-            if (parent instanceof MapAsRoot mapAsRoot) {
-                this.mapRootSaxHandlerDelegate = new MapRootSaxHandler(mapAsRoot.map());
-                this.objectInstances.push(mapAsRoot.root());
-            } else {
-                this.objectInstances.push(parent);
-            }
+        List<PathWriter> pathWriters = pathWriterIndex.get(path);
+        if (pathWriters != null) {
+			pathWriters.forEach(pathWriter -> {
+				Object parent = pathWriter.getRootInitializer().get();
+				if (parent instanceof MapAsRoot mapAsRoot) {
+					this.mapRootSaxHandlerDelegate = new MapRootSaxHandler(mapAsRoot.map());
+					this.objectInstances.push(mapAsRoot.root());
+				} else {
+					this.objectInstances.push(parent);
+				}
+			});
         }
     }
 
