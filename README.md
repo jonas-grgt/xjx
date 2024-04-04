@@ -1,4 +1,4 @@
-# 🙅 Xjx [![Maven Central](https://img.shields.io/maven-central/v/io.jonasg/xjx-serdes.svg)](https://search.maven.org/artifact/io.jonasg/xjx-serdes)
+# 🙅 Xjx [![Maven Central](https://img.shields.io/maven-central/v/io.jonasg/xjx-serdes.svg)](https://search.maven.org/artifact/io.jonasg/xjx-serdes) [![License](https://img.shields.io/github/license/jonas-grgt/xjx.svg)](https://opensource.org/licenses/Apache-2.0)
 Java - XML serializing and deserializing (serdes) library: No Dependencies, Just Simplicity
 
 # 🤔 Why
