@@ -1,5 +1,6 @@
 package io.jonasg.xjx.serdes.deserialize;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -19,6 +20,8 @@ import java.util.function.Supplier;
 
 import io.jonasg.xjx.serdes.Path;
 import io.jonasg.xjx.serdes.Tag;
+import io.jonasg.xjx.serdes.TagAttribute;
+import io.jonasg.xjx.serdes.TagValue;
 import io.jonasg.xjx.serdes.TypeMappers;
 import io.jonasg.xjx.serdes.deserialize.accessor.FieldAccessor;
 import io.jonasg.xjx.serdes.deserialize.config.XjxConfiguration;
@@ -30,6 +33,8 @@ public class PathWriterIndexFactory {
     public static final List<Class<?>> BASIC_TYPES = List.of(
             String.class, Integer.class, int.class, Boolean.class, boolean.class, Long.class, long.class, BigDecimal.class, Double.class,
             double.class, char.class, Character.class, LocalDate.class, LocalDateTime.class, ZonedDateTime.class);
+
+    public static final Set<Class<? extends Annotation>> SUPPORTED_ANNOTATIONS = Set.of(Tag.class, TagValue.class, TagAttribute.class);
 
 	private final XjxConfiguration configuration;
 
@@ -205,7 +210,7 @@ public class PathWriterIndexFactory {
     }
 
     private void indexSimpleType(FieldReflector field, PathWriterIndex index, Path path, Supplier<Object> parent) {
-        if (field.hasAnnotation(Tag.class)) {
+        if (SUPPORTED_ANNOTATIONS.stream().anyMatch(field::hasAnnotation)) {
             index.put(getPathForField(field, path), PathWriter.valueInitializer((value) -> {
                 if (value instanceof String) {
                     value = ValueDeserializationHandler.getInstance().handle(field.rawField(), (String) value)
@@ -332,6 +337,17 @@ public class PathWriterIndexFactory {
             }
             return activePath.appendAttribute(tagPath.attribute());
         }
+
+        TagValue tagValue = field.getAnnotation(TagValue.class);
+        if (tagValue != null) {
+            return path;
+        }
+
+        TagAttribute tagAttribute = field.getAnnotation(TagAttribute.class);
+        if (tagAttribute != null) {
+            return path.appendAttribute(tagAttribute.attribute());
+        }
+
         return path.append(field.name());
     }
 }
