@@ -170,6 +170,36 @@ public class Person {
 }
 ```
 
+### Optional. @TagValue and @TagAttribute
+Xjx provides 2 extra annotations for deserialization: `@TagValue` and `@TagAttribute`.
+They are designed to refer to the class as a tag itself.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Person>
+    <Name age="18" sex="MALE">John</Name>
+</Person>
+```
+
+```java
+class Person {
+    @Tag(path = "/Person/Name")
+    Name name;
+}
+
+class Name {
+    @TagValue
+    String value;
+
+    @TagAttribute(attribute = "sex")
+    String sex;
+
+    @TagAttribute(attribute = "age")
+    String age;
+}
+```
+
+
 ### Enum types
 
 Xjx offers straightforward and efficient deserialization support for Enum types. 
