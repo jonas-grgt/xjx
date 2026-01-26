@@ -52,7 +52,7 @@
 
         <jreleaser.version>1.9.0</jreleaser.version>
 		<junit-bom.version>5.10.1</junit-bom.version>
-		<assertj-core.version>3.23.1</assertj-core.version>
+		<assertj-core.version>3.27.7</assertj-core.version>
     </properties>
 
     <dependencyManagement>
