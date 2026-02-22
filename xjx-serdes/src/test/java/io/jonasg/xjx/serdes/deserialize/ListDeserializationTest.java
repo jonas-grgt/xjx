@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import io.jonasg.xjx.serdes.TagAttribute;
+import io.jonasg.xjx.serdes.TagValue;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -623,7 +625,7 @@ public class ListDeserializationTest {
 				   <City name="G"/>
 				  </Locations>
 				 </WeatherReport>
-				 """;
+				""";
 			XjxSerdes xjx = new XjxSerdes();
 			var weatherReport = xjx.read(data, WeatherReport.class);
 
@@ -649,7 +651,7 @@ public class ListDeserializationTest {
 				  <Town name="C"/>
 				  <City name="G"/>
 				 </WeatherReport>
-				 """;
+				""";
 			XjxSerdes xjx = new XjxSerdes();
 			var weatherReport = xjx.read(data, WeatherReportAtRoot.class);
 
@@ -668,7 +670,7 @@ public class ListDeserializationTest {
 			<manifest>
 			 <foo name="A"/>
 			 <foo name="B"/>
-			 
+
 			 <bar name="X">
 			     <info val="InfoValX1"/>
 			     <info val="InfoValX2"/>
@@ -691,6 +693,114 @@ public class ListDeserializationTest {
 							new Bar("Z", List.of(new Info("InfoValZ1"))));
 		}
 	}
+
+    @Nested
+    class TagValueTagAttributeListsTest {
+
+        @Test
+        void repeatedTagContainingCollection() {
+            String data = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <manifest>
+                        <foo name="A">
+                            Value 1
+                        </foo>
+                        <foo name="B">
+                            Value 2
+                        </foo>
+                    </manifest>
+                    """;
+            XjxSerdes xjx = new XjxSerdes();
+            Manifest manifest = xjx.read(data, Manifest.class);
+
+            assertThat(manifest.foos)
+                    .hasSize(2)
+                    .containsExactly(new Foo("Value 1", "A"), new Foo("Value 2", "B"))
+            ;
+        }
+
+        public static class Manifest {
+            @Tag(path = "/manifest", items = "foo")
+            private List<Foo> foos;
+
+            public List<Foo> getFoos() {
+                return foos;
+            }
+
+            public void setFoos(List<Foo> foos) {
+                this.foos = foos;
+            }
+
+            @Override
+            public String toString() {
+                return "Manifest{" +
+                       "foos=" + foos +
+                       '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (!(o instanceof Manifest manifest)) return false;
+                return Objects.equals(foos, manifest.foos);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hashCode(foos);
+            }
+        }
+
+        public static class Foo {
+            @TagValue
+            private String value;
+            @TagAttribute(attribute = "name")
+            private String attribute;
+
+            public Foo() {
+            }
+
+            public Foo(String value, String attribute) {
+                this.value = value;
+                this.attribute = attribute;
+            }
+
+            public String getValue() {
+                return value;
+            }
+
+            public void setValue(String value) {
+                this.value = value.trim();
+            }
+
+            public String getAttribute() {
+                return attribute;
+            }
+
+            public void setAttribute(String attribute) {
+                this.attribute = attribute;
+            }
+
+            @Override
+            public String toString() {
+                return "Foo{" +
+                       "value='" + value + '\'' +
+                       ", attributeAA='" + attribute + '\'' +
+                       '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (!(o instanceof Foo foo)) return false;
+                return Objects.equals(value, foo.value) && Objects.equals(attribute, foo.attribute);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value, attribute);
+            }
+        }
+
+    }
 
 	private static class Manifest {
 		@Tag(path = "/manifest", items = "foo")

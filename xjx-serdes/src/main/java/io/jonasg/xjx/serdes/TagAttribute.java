@@ -1,0 +1,52 @@
+package io.jonasg.xjx.serdes;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * The {@code TagValue} annotation is used to mark an object for XML deserialization.
+ * It provides information about the XML path and attributes to be used during deserialization.
+ *
+ * <p>Example XML document:</p>
+ * <pre>{@code
+ * <Products>
+ *     <Name id="1">Product 1</Name>
+ *     <Name id="2">Product 2</Name>
+ *     <Name id="3">Product 3</Name>
+ * </Products>
+ * }</pre>
+ *
+ * <p>Example Usage:</p>
+ * <pre>{@code
+ * @Tag(path = "/Products", items = "Name")
+ * List<Name> productNames;
+ *
+ * ...
+ *
+ * class Name {
+ *
+ *    @TagAttribute(name = "id")
+ *    String id;
+ *
+ * }
+ * }
+ *
+ * <p>Annotation Usage:</p>
+ * <ul>
+ *   <li>{@code name}: Specifies the name of an XML attribute to be used during deserialization.</li>
+ * </ul>
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.RECORD_COMPONENT})
+public @interface TagAttribute {
+
+    /**
+     * Specifies the name of an XML attribute to be used during deserialization.
+     *
+     * @return The name of the XML attribute.
+     */
+    String attribute();
+
+}
